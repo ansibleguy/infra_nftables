@@ -1,0 +1,7 @@
+---
+
+- name: NFTables | Debian | Task
+  ansible.builtin.apt:
+    pkg: "{{ something }}"
+    state: present
+  tags: [base]

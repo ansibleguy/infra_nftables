@@ -1,0 +1,12 @@
+---
+
+no_prompts: false
+debug: false
+
+# default config => is overwritten by provided config
+defaults_nftables: {}
+
+NFT_CONFIG: "{{ defaults_nftables | combine(nftables, recursive=true) }}"
+
+defaults_table: {}
+defaults_chain: {}

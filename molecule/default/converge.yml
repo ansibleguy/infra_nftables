@@ -1,0 +1,8 @@
+---
+
+- name: Converge
+  hosts: grp_targets  # {{ lookup('ansible.builtin.env', 'USER') }}
+  #  vars:
+
+  roles:
+    - ansibleguy.ROLE

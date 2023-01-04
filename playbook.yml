@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -K -D -i inventory/hosts.yml playbook.yml
+
+- hosts: all
+  become: true
+  gather_facts: yes
+  roles:
+  - ansibleguy.infra_nftables

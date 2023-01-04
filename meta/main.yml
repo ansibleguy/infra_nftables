@@ -1,0 +1,20 @@
+---
+
+galaxy_info:
+  author: 'AnsibleGuy <guy@ansibleguy.net>'
+  namespace: 'ansibleguy'
+  license: 'GPLv3'
+  issue_tracker_url: 'https://github.com/ansibleguy/infra_nftables/issues'
+  min_ansible_version: 2.9.0
+  description: 'Ansible Role to provision NFTables firewall on linux servers'
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+  galaxy_tags:
+    - 'nftables'
+    - 'firewall'
+    - 'filter'
+    - 'network'
+
+collections: []
