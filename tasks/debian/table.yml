@@ -1,0 +1,28 @@
+---
+
+- name: "NFTables | Debian | Table '{{ nft_table_name }}' | Checking config"
+  ansible.builtin.assert:
+    that:
+      - nft_table.type in NFT_HC.choises.table.types
+      - nft_table.type in NFT_HC.choises.table.types
+
+- name: "NFTables | Debian | Table '{{ nft_table_name }}' | Chains"
+  ansible.builtin.include_tasks: chain.yml
+  vars:
+    nft_chain_name: "{{ nft_chain_item.key | nftables_safe_name }}"
+    nft_chain: "{{ defaults_chain |
+    combine(nftables._defaults.chain |
+    combine(nft_chain_item.value) }}"
+  loop_control:
+    loop_var: nft_chain_item
+  with_dict: nft_table.chains
+
+- name: "NFTables | Debian | Table '{{ nft_table_name }}' | Copying table config"
+  ansible.builtin.template:
+    src: "templates{{ NFT_HC.path.config_dir }}/table.nft.j2"
+    dest: "{{ NFT_HC.path.config_dir }}/{{ nft_table_name }}.nft"
+    mode: 0640
+    owner: 'root'
+    group: 'root'
+    validate: 'nft -cf %s'
+  notify: reload_nftables

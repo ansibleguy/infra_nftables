@@ -4,6 +4,7 @@
   ansible.builtin.assert:
     that:
       - nftables is defined
+      - nftables.tables is defined
 
 - name: NFTables | Processing debian config
   ansible.builtin.import_tasks: debian/main.yml

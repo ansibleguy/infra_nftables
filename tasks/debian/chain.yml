@@ -1,0 +1,8 @@
+---
+
+- name: "NFTables | Debian | Table '{{ nft_table_name }}' | Chain '{{ nft_chain_name }}' | Checking config"
+  ansible.builtin.assert:
+    that:
+      - nft_chain.type in NFT_HC.choises.chain.types
+      - nft_chain.hook in NFT_HC.choises.hook[nft_table.type][nft_chain.type]
+      - nft_chain.priority in NFT_HC.choises.priorities

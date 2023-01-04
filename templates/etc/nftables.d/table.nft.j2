@@ -1,0 +1,65 @@
+#!/usr/sbin/nft -f
+
+table {{ nft_table.type }} {{ nft_table_name }} {
+{%   if nft_table.vars | length > 0 %}
+    # vars
+{%   endif %}
+{% for k, v in nft_table.vars.items()
+  {{ k | nftables_format_var(v) }}
+{% endfor %}
+{%   if nft_table.sets | length > 0 %}
+  # sets
+{%   endif %}
+{%   for k, v in nft_table.sets.items()
+  set {
+    {{ v | nftables_format_set(4) }}
+  }
+{%   endfor %}
+
+{% for nft_chain_name, nft_chain_item in nft_table.chains.items() %}
+{%   set nft_chain = defaults_chain | combine(nftables.defaults.chain | default({})) | combine(nft_chain_item) %}
+{%   set nft_chain_main = nft_chain.hook is not none %}
+{%   if nft_chain_name in NFT_CONFIG._defaults.rules[nft_table_name] %}
+{%     set nft_chain_rules = NFT_CONFIG._defaults.rules[nft_chain_name] | extend_list(nft_chain.rules) %}
+{%   else %}
+{%     set nft_chain_rules = nft_chain.rules %}
+{%   endif %}
+{%   if nft_chain_name in nft_table._defaults.rules[nft_table_name] %}
+{%     set nft_chain_rules = nft_table._defaults.rules[nft_chain_name] | extend_list(nft_chain_rules) %}
+{%   endif %}
+
+{% if nft_chain_main %}
+    type {{ nft_chain.type }} hook {{ nft_chain.hook }} priority {{ nft_chain.priority }}; policy {{ nft_chain.policy }};
+
+{% endif %}
+
+{%   if nft_chain.vars | length > 0 %}
+    # vars
+{%   endif %}
+{%   for k, v in nft_chain.vars.items()
+    {{ k | nftables_format_var(v) }}
+{%   endfor %}
+
+{%   if nft_chain.sets | length > 0 %}
+    # sets
+{%   endif %}
+{%   for k, v in nft_chain.sets.items()
+    set {
+      {{ v | nftables_format_set(6) }}
+    }
+{%   endfor %}
+
+{% for rule in nft_chain_rules | nftables_rules_sort(NFT_HC.rules.sort) | nftables_rules_translate(NFT_HC.rules.translate) %}
+    {{ rule }}
+{% endfor %}
+
+{%   if nft_chain.counter %}
+    counter comment "COUNT {{ nft_table_name }}-{{ nft_chain_main }}{% if nft_chain_main %}-{{ chain.policy }}{% endif %}"
+{%   endif %}
+{%   if nft_chain_main and nft_chain.log.drop and nft_chain.policy == 'drop' %}
+    log prefix "DROP {{ nft_table_name }}-{% if nft_chain.log.prefix %}{{ nft_chain.log.prefix }}{% else %}{{ nft_chain_main }}{% endif %} "
+{%   endif %}
+
+{% endfor %}
+}
+

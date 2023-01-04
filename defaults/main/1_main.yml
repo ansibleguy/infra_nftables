@@ -1,12 +1,50 @@
 ---
 
-no_prompts: false
-debug: false
+nftables: {}
 
 # default config => is overwritten by provided config
-defaults_nftables: {}
+defaults_nftables:
+  _defaults:
+    table: {}
+    chain: {}
+    rules: {}
+    # rules:
+    #   chain1: ['rule1', 'rule2']
+
+  tables: {}
+  vars: {}  # vars shared by all tables
 
 NFT_CONFIG: "{{ defaults_nftables | combine(nftables, recursive=true) }}"
 
-defaults_table: {}
-defaults_chain: {}
+defaults_table:
+  type: 'inet'  # inet, ip6, ip4, arp, bridge, netdev
+  vars: {}
+  sets: {}
+  chains: {}
+  _defaults:
+    rules: {}
+    # rules:
+    #   chain1: ['rule1', 'rule2']
+
+defaults_chain:
+  type: 'filter'  # filter, route, nat
+  hook: none  # input, output, forward, prerouting, postrouting, ingress
+  policy: 'drop'
+  priority: 0  # lower=better; -400, -300, -225, -200, -150, -100, 50, 100, 225, 300
+  counter: true
+  log:
+    drop: true
+    prefix: none
+
+  rules: []
+  vars: {}
+  sets: {}
+
+defaults_set:
+  type: 'ipv4_addr'
+  flags: []
+  settings: {}
+  counter: true
+
+no_prompts: false
+debug: false

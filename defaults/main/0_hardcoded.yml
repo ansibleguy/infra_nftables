@@ -1,3 +1,84 @@
 ---
 
+NFT_HC:
+  path:
+    config_dir: '/etc/nftables.d'
+    base_file: '/etc/nftables.conf'
 
+  choises:
+    table:
+      types: ['inet', 'ip6', 'ip4', 'arp', 'bridge', 'netdev']
+
+    chain:
+      types: ['filter', 'nat', 'route']
+
+    hook:  # see: https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks
+      inet:
+        filter: ['ingress', 'prerouting', 'forward', 'input', 'output', 'postrouting']
+        nat: ['prerouting', 'input', 'output', 'postrouting']
+        route: ['output']
+      ip6:
+        filter: ['prerouting', 'forward', 'input', 'output', 'postrouting']
+        nat: ['prerouting', 'input', 'output', 'postrouting']
+        route: ['output']
+      ip4:
+        filter: ['prerouting', 'forward', 'input', 'output', 'postrouting']
+        nat: ['prerouting', 'input', 'output', 'postrouting']
+        route: ['output']
+      arp:
+        filter: ['input', 'output']
+        nat: []
+        route: []
+      bridge:
+        filter: ['prerouting', 'forward', 'input', 'output', 'postrouting']
+        nat: []
+        route: []
+      netdev:
+        filter: ['ingress']
+        nat: []
+        route: []
+
+    priorities: [-400, -300, -225, -200, -150, -100, 0, 50, 100, 225, 300]
+
+    set:
+      types: [
+        'ipv4_addr', 'ipv6_addr', 'ether_addr', 'inet_proto', 'inet_service',
+        'mark', 'ifname',
+      ]
+      flags: ['constant', 'interval', 'timeout']
+      policies: ['performance', 'memory']
+
+  rules:
+    sort:
+      fields: ['s', 'seq', 'sequence', 'id']
+      fallback: 1000
+
+    translate:
+      # sequence of fields needed in nft config
+      sequence: [
+        'iifname', 'oifname', 'proto', 'type', 'dport', 'ip daddr', 'sport', 'ip saddr',
+        'log prefix', 'action',
+      ]
+
+      aliases: # config to nft field translation
+        iifname: ['if', 'iif']
+        oifname: ['of', 'oif']
+        dport: ['port', 'dest_port', 'dp']
+        sport: ['sport', 'src_port', 'sp']
+        'ip daddr': ['dest', 'destination', 'target', 'd']
+        'ip saddr': ['src', 'source', 's']
+        'log prefix': ['log', 'l']
+        comment: ['cmt', 'c']
+        type: ['t']
+
+      field_remove: ['proto', 'action']
+
+      # values should be in quotes
+      quote: ['comment', 'iifname', 'oifname', 'log prefix']
+
+      # default values if not provided
+      defaults:
+        action: 'accept'
+
+      # add generic drop logging to any rule that drops packages
+      drop_log: true

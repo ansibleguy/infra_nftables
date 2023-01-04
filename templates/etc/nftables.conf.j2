@@ -1,0 +1,11 @@
+#!/usr/sbin/nft -f
+
+# {{ ansible_managed }}
+
+flush ruleset
+
+{% for k, v in NFT_CONFIG.vars.items()
+{{ k | nftables_format_var(v) }}
+{% endfor %}
+
+include "{{ NFT_HC.path.config_dir }}/*.nft"
