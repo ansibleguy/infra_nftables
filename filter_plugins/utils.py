@@ -33,92 +33,152 @@ class FilterModule(object):
         return regex_replace('[^0-9a-zA-Z]+', '', name.replace(' ', '_'))
 
     @classmethod
-    def nftables_rules_translate(cls, raw_rules: list, config: dict) -> list:
+    def _translate_rule(cls, rule: dict, config: dict):
+        translation = config['defaults'].copy()
+        mapping = {}
+
+        for field_dst, fields_src in config['aliases'].items():
+            for field_src in fields_src:
+                if field_src in rule:
+                    mapping[field_dst] = field_src
+                    value = rule[field_src]
+
+                    if isinstance(value, list):
+                        value = cls.nftables_format_list(value)
+
+                    elif field_dst in config['quote'] and value.find('"') == -1:
+                        value = f'"{value}"'
+
+                    if isinstance(value, str):
+                        value.strip()
+
+                    if field_dst in config['remove']:
+                        translation[field_dst] = value
+
+                    else:
+                        translation[field_dst] = f"{field_dst} {value}"
+
+                    break
+
+        # add generic logging for any dropped packets
+        if config['drop_log'] and translation['action'] == 'drop' \
+                and 'log prefix' not in mapping:
+            if 'comment' in translation:
+                _comment = translation['comment'].replace('comment ', '')
+
+            else:
+                _comment = f"\"{config['drop_log_prefix']}\""
+
+            translation['log prefix'] = f"log prefix {_comment}"
+
+        # concat the rule in its designated field-sequence
+        translated_rule = ''
+        for field_nft in config['sequence']:
+            if field_nft in translation:
+                translated_rule += f"{translation[field_nft]} "
+
+        return translated_rule.strip()
+
+    @classmethod
+    def nftables_rules_translate(cls, raw_rules: list, translate_config: dict) -> list:
         rules = []
         NONE_VALUES = ['', ' ', None]
 
-        for r in raw_rules:
-            if isinstance(r, str):
-                _rule = r
-
-            elif not isinstance(r, dict):
+        for rule in raw_rules:
+            # pass raw rules directly (either as 'raw' key or only string)
+            if not isinstance(rule, (dict, str)):
                 raise ValueError(
-                    'Rule has unsupported format! Should be string or dict!'
-                    f"Rule: {r}'"
+                    'Rule has unsupported format - should be string or dict! '
+                    f"Rule: {rule}'"
                 )
 
-            elif 'raw' in r:
-                _rule = r['raw']
+            elif isinstance(rule, str):
+                _translated = rule
+
+            elif 'raw' in rule:
+                _translated = rule['raw']
 
             else:
-                _translation = config['defaults'].copy()
-                _field_mapping = {}
+                _translated = cls._translate_rule(
+                    rule=rule,
+                    config=translate_config,
+                )
 
-                for field_nft, fields_config in config['aliases'].items():
-                    for field_config in fields_config:
-                        if field_config in r:
-                            _field_mapping[field_nft] = field_config
-                            _value = r[field_config]
-
-                            if isinstance(_value, list):
-                                _value = cls.nftables_format_list(_value)
-
-                            elif field_nft in config['quote'] and _value.find('"') == -1:
-                                _value = f'"{_value}"'
-
-                            if isinstance(_value, str):
-                                _value.strip()
-
-                            if field_nft not in NONE_VALUES:
-                                _translation[field_nft] = f"{field_nft} {_value}"
-
-                            else:
-                                _translation[field_nft] = _value
-
-                if config['drop_log'] and _translation['action'] == 'drop' and 'log prefix' not in _field_mapping:
-                    # add generic logging for any dropped packets
-                    if 'comment' in _translation:
-                        _translation['log prefix'] = f"log prefix \"{_translation['comment']}\""
-
-                    else:
-                        _translation['log prefix'] = 'log'
-
-                _rule = ''
-                for field_nft in config['sequence']:
-                    if field_nft in _translation:
-                        _rule += f"{_translation[field_nft]} "
-
-                _rule = _rule.strip()
-
-            if _rule in NONE_VALUES:
+            if _translated in NONE_VALUES:
                 continue
 
-            rules.append(_rule)
+            rules.append(_translated)
 
         return rules
 
     @staticmethod
-    def nftables_rules_sort(raw_rules: list, config: dict) -> list:
+    def _get_sequence(rule: (dict, str), sort_config: dict) -> int:
+        if isinstance(rule, dict):
+            for k in sort_config['fields']:
+                if k in rule:
+                    return rule[k]
+
+        sort_config['fallback'] += 1
+        return sort_config['fallback']
+
+    @staticmethod
+    def nftables_merge_rules(rules: list, config: dict, table: dict, chain_name: str) -> list:
+        if '_all' in config['_defaults']['rules']:
+            rules.extend(config['_defaults']['rules']['_all'])
+
+        if chain_name in config['_defaults']['rules']:
+            rules.extend(config['_defaults']['rules'][chain_name])
+
+        if '_all' in table['_defaults']['rules']:
+            rules.extend(table['_defaults']['rules']['_all'])
+
+        if chain_name in table['_defaults']['rules']:
+            rules.extend(table['_defaults']['rules'][chain_name])
+
+        return rules
+
+    @classmethod
+    def nftables_merge_sort_translate_rules(
+            cls, rules: list, config: dict, table: dict, chain_name: str,
+            config_hc: dict,
+    ) -> list:
+        rules = cls.nftables_merge_rules(
+            rules=rules,
+            config=config,
+            table=table,
+            chain_name=chain_name,
+        )
+        rules = cls.nftables_rules_sort(
+            raw_rules=rules,
+            sort_config=config_hc['rules']['sort'],
+        )
+
+        return cls.nftables_rules_translate(
+            raw_rules=rules,
+            translate_config=config_hc['rules']['translate'],
+        )
+
+    @classmethod
+    def nftables_unique_sequence(cls, raw_rules: list, sort_config: dict) -> bool:
+        sequences = []
+
+        for rule in raw_rules:
+            _seq = cls._get_sequence(rule=rule, sort_config=sort_config)
+
+            if _seq in sequences:
+                return False
+
+            sequences.append(_seq)
+
+        return True
+
+    @classmethod
+    def nftables_rules_sort(cls, raw_rules: list, sort_config: dict) -> list:
         rules = []
         ordered = {}
 
-        for r in raw_rules:
-            _seq = None
-
-            if isinstance(r, dict):
-                for k in config['fields']:
-                    if k in r:
-                        _seq = r[k]
-                        break
-
-            if _seq is None:
-                _seq = config['fallback']
-                config['fallback'] += 1
-
-            if _seq in ordered:
-                raise ValueError(f"Got duplicate rule sequence: '{_seq}' in rule: {r}")
-
-            ordered[_seq] = r
+        for rule in raw_rules:
+            ordered[cls._get_sequence(rule=rule, sort_config=sort_config)] = rule
 
         sequence = list(ordered.keys())
         sequence.sort()

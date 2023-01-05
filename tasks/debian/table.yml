@@ -11,11 +11,11 @@
   vars:
     nft_chain_name: "{{ nft_chain_item.key | nftables_safe_name }}"
     nft_chain: "{{ defaults_chain |
-    combine(nftables._defaults.chain |
+    combine(nftables._defaults.chain) |
     combine(nft_chain_item.value) }}"
   loop_control:
     loop_var: nft_chain_item
-  with_dict: nft_table.chains
+  with_dict: "{{ nft_table.chains }}"
 
 - name: "NFTables | Debian | Table '{{ nft_table_name }}' | Copying table config"
   ansible.builtin.template:
@@ -25,4 +25,4 @@
     owner: 'root'
     group: 'root'
     validate: 'nft -cf %s'
-  notify: reload_nftables
+  notify: Restart-nftables

@@ -21,18 +21,18 @@
     owner: 'root'
     group: 'root'
     validate: 'nft -cf %s'
-  notify: reload_nftables
+  notify: Restart-nftables
 
 - name: NFTables | Debian | Tables
   ansible.builtin.include_tasks: table.yml
   vars:
     nft_table_name: "{{ nft_table_item.key | nftables_safe_name }}"
     nft_table: "{{ defaults_table |
-    combine(nftables._defaults.table |
+    combine(nftables._defaults.table) |
     combine(nft_table_item.value) }}"
   loop_control:
     loop_var: nft_table_item
-  with_dict: NFT_CONFIG.tables
+  with_dict: "{{ NFT_CONFIG.tables }}"
 
 - name: NFTables | Debian | Enabling/Starting service
   ansible.builtin.service:

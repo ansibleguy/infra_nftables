@@ -19,14 +19,6 @@ table {{ nft_table.type }} {{ nft_table_name }} {
 {% for nft_chain_name, nft_chain_item in nft_table.chains.items() %}
 {%   set nft_chain = defaults_chain | combine(nftables.defaults.chain | default({})) | combine(nft_chain_item) %}
 {%   set nft_chain_main = nft_chain.hook is not none %}
-{%   if nft_chain_name in NFT_CONFIG._defaults.rules[nft_table_name] %}
-{%     set nft_chain_rules = NFT_CONFIG._defaults.rules[nft_chain_name] | extend_list(nft_chain.rules) %}
-{%   else %}
-{%     set nft_chain_rules = nft_chain.rules %}
-{%   endif %}
-{%   if nft_chain_name in nft_table._defaults.rules[nft_table_name] %}
-{%     set nft_chain_rules = nft_table._defaults.rules[nft_chain_name] | extend_list(nft_chain_rules) %}
-{%   endif %}
 
 {% if nft_chain_main %}
     type {{ nft_chain.type }} hook {{ nft_chain.hook }} priority {{ nft_chain.priority }}; policy {{ nft_chain.policy }};
@@ -49,7 +41,7 @@ table {{ nft_table.type }} {{ nft_table_name }} {
     }
 {%   endfor %}
 
-{% for rule in nft_chain_rules | nftables_rules_sort(NFT_HC.rules.sort) | nftables_rules_translate(NFT_HC.rules.translate) %}
+{% for rule in nft_chain.rules | nftables_merge_sort_translate_rules(NFT_CONFIG, nft_table, nft_chain_name, NFT_HC) %}
     {{ rule }}
 {% endfor %}
 

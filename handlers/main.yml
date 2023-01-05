@@ -1,5 +1,6 @@
 ---
 
-- name: reload_nftables
-  ansible.builtin.command: "nft -f {{ NFT_HC.path.base_file }}"
-  changed_when: false
+- name: Restart-nftables
+  ansible.builtin.service:
+    name: 'nftables.service'
+    state: restarted

@@ -60,7 +60,7 @@ NFT_HC:
         'log prefix', 'action',
       ]
 
-      aliases: # config to nft field translation
+      aliases:  # config to nft field translation
         iifname: ['if', 'iif']
         oifname: ['of', 'oif']
         dport: ['port', 'dest_port', 'dp']
@@ -70,8 +70,10 @@ NFT_HC:
         'log prefix': ['log', 'l']
         comment: ['cmt', 'c']
         type: ['t']
+        action: ['a']
+        proto: ['pr', 'protocol']
 
-      field_remove: ['proto', 'action']
+      remove: ['proto', 'action']
 
       # values should be in quotes
       quote: ['comment', 'iifname', 'oifname', 'log prefix']
@@ -82,3 +84,4 @@ NFT_HC:
 
       # add generic drop logging to any rule that drops packages
       drop_log: true
+      drop_log_prefix: 'DROP'

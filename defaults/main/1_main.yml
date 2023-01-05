@@ -7,9 +7,11 @@ defaults_nftables:
   _defaults:
     table: {}
     chain: {}
-    rules: {}
-    # rules:
-    #   chain1: ['rule1', 'rule2']
+    rules:
+      _all: []
+
+      # rules:
+      #   chain1: ['rule1', 'rule2']
 
   tables: {}
   vars: {}  # vars shared by all tables
@@ -22,9 +24,11 @@ defaults_table:
   sets: {}
   chains: {}
   _defaults:
-    rules: {}
-    # rules:
-    #   chain1: ['rule1', 'rule2']
+    rules:
+      _all: []
+
+      # rules:
+      #   chain1: ['rule1', 'rule2']
 
 defaults_chain:
   type: 'filter'  # filter, route, nat
