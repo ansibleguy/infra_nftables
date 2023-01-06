@@ -1,0 +1,25 @@
+{% if nft_table.vars | length > 0 %}
+
+  # vars
+{%   for k, v in nft_table.vars.items() %}
+  {{ k | nftables_format_var(v) }}
+{%   endfor %}
+{% endif %}
+{% if nft_table.sets | length > 0 %}
+
+  # sets
+{%   for k, v in nft_table.sets.items() %}
+  set {{ k }} {
+    {{ defaults_set | combine(v, recursive=true) | nftables_format_set(4) }}
+  }
+{%   endfor %}
+{% endif %}
+{% if nft_table.counters | length > 0 %}
+
+  # counters
+{%   for k, v in nft_table.counters.items() %}
+  counter {{ k }} {
+    {{ v | nftables_format_counter(6) }}
+  }
+{%   endfor %}
+{% endif %}

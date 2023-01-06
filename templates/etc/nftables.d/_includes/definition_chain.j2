@@ -1,0 +1,8 @@
+{# NOTE: sets and counters are not valid in the chain-scope #}
+{% if chain.vars | length > 0 %}
+
+    # vars
+{%   for k, v in chain.vars.items() %}
+    {{ k | nftables_format_var(v) }}
+{%   endfor %}
+{% endif %}

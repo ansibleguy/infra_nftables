@@ -1,0 +1,64 @@
+---
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Checking config"
+  ansible.builtin.assert:
+    that:
+      - nft_table.type in NFT_HC.choices.table.types
+  ignore_errors: true
+  register: nft_config_check_table
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Informing user"
+  ansible.builtin.fail:
+    msg: "Table config seems to be invalid!
+    Make sure these rules are followed:
+    1. Table type is defined and valid ({{ NFT_HC.choices.table.types | join(', ') }})"
+  when:
+    - nft_config_check_table.failed is defined
+    - nft_config_check_table.failed
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Chains"
+  ansible.builtin.include_tasks: chain.yml
+  vars:
+    nft_chain_name: "{{ nft_chain_item.key | nftables_safe_name }}"
+    nft_chain: "{{ defaults_chain |
+    combine(NFT_CONFIG._defaults.chain, recursive=true) |
+    combine(nft_chain_item.value, recursive=true) }}"
+  loop_control:
+    loop_var: nft_chain_item
+  with_dict: "{{ nft_table.chains }}"
+  no_log: true  # less verbose output
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Copying table config"
+  ansible.builtin.template:
+    src: "templates{{ NFT_HC.path.config_dir }}/table.nft.j2"
+    dest: "{{ NFT_HC.path.config_dir }}/{{ nft_table_name }}.nft"
+    mode: 0640
+    owner: 'root'
+    group: 'root'
+    validate: 'nft -cf %s'
+  notify: Restart-nftables
+  ignore_errors: true
+  register: nft_config_table
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Copying table config for debugging (/tmp/{{ nft_table_name }}.nft)"
+  ansible.builtin.template:
+    src: "templates{{ NFT_HC.path.config_dir }}/table.nft.j2"
+    dest: '/tmp/{{ nft_table_name }}.nft'
+    mode: 0640
+    owner: 'root'
+    group: 'root'
+  when:
+    - nft_config_table.failed is defined
+    - nft_config_table.failed
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Failing"
+  ansible.builtin.fail:
+    msg: "Config of table {{ nft_table_name }} is invalid!"
+  when:
+    - nft_config_table.failed is defined
+    - nft_config_table.failed
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Removing debugging-config"
+  ansible.builtin.file:
+    state: absent
+    path: '/tmp/{{ nft_table_name }}.nft'

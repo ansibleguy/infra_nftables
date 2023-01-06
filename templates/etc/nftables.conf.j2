@@ -4,7 +4,7 @@
 
 flush ruleset
 
-{% for k, v in NFT_CONFIG.vars.items()
+{% for k, v in NFT_CONFIG.vars.items() %}
 {{ k | nftables_format_var(v) }}
 {% endfor %}
 

@@ -5,7 +5,7 @@ NFT_HC:
     config_dir: '/etc/nftables.d'
     base_file: '/etc/nftables.conf'
 
-  choises:
+  choices:
     table:
       types: ['inet', 'ip6', 'ip4', 'arp', 'bridge', 'netdev']
 
@@ -57,7 +57,7 @@ NFT_HC:
       # sequence of fields needed in nft config
       sequence: [
         'iifname', 'oifname', 'proto', 'type', 'dport', 'ip daddr', 'sport', 'ip saddr',
-        'log prefix', 'action',
+        'log prefix', 'counter', 'action', 'masquerade', 'snat to', 'dnat to', 'comment',
       ]
 
       aliases:  # config to nft field translation
@@ -72,8 +72,17 @@ NFT_HC:
         type: ['t']
         action: ['a']
         proto: ['pr', 'protocol']
+        counter: ['count']
+        'snat to': ['snat', 'src_nat', 'source_nat', 'outbound_nat']
+        'dnat to': ['dnat', 'dest_nat', 'destination_nat']
+        masquerade: ['masque', 'm']
 
-      remove: ['proto', 'action']
+      remove:
+        key: ['proto', 'action']
+        value: ['masquerade']
+        value_bool:
+          counter:
+            append: 'name'
 
       # values should be in quotes
       quote: ['comment', 'iifname', 'oifname', 'log prefix']
@@ -82,6 +91,13 @@ NFT_HC:
       defaults:
         action: 'accept'
 
+      incompatible:  # only one of the fields may be present
+        - ['action', 'snat to', 'dnat to', 'masquerade']
+
       # add generic drop logging to any rule that drops packages
       drop_log: true
       drop_log_prefix: 'DROP'
+
+      raw_key: ['raw', 'r']
+
+  incompatible_packages: ['iptables', 'ufw']

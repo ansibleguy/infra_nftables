@@ -9,7 +9,12 @@ class FilterModule(object):
             "nftables_rules_sort": self.nftables_rules_sort,
             "nftables_format_list": self.nftables_format_list,
             "nftables_format_var": self.nftables_format_var,
+            "nftables_format_counter": self.nftables_format_counter,
             "nftables_safe_name": self.nftables_safe_name,
+            "nftables_format_set": self.nftables_format_set,
+            "nftables_merge_rules": self.nftables_merge_rules,
+            "nftables_unique_sequence": self.nftables_unique_sequence,
+            "nftables_merge_sort_translate_rules": self.nftables_merge_sort_translate_rules,
             "ensure_list": self.ensure_list,
             "extend_list": self.extend_list,
         }
@@ -30,14 +35,19 @@ class FilterModule(object):
 
     @staticmethod
     def nftables_safe_name(name: str) -> str:
-        return regex_replace('[^0-9a-zA-Z]+', '', name.replace(' ', '_'))
+        return regex_replace('[^0-9a-zA-Z_\-]+', '', name)
 
     @classmethod
     def _translate_rule(cls, rule: dict, config: dict):
         translation = config['defaults'].copy()
         mapping = {}
+        special_cases = {
+            'proto': 'meta l4proto'
+        }
 
         for field_dst, fields_src in config['aliases'].items():
+            fields_src.append(field_dst)
+
             for field_src in fields_src:
                 if field_src in rule:
                     mapping[field_dst] = field_src
@@ -46,23 +56,47 @@ class FilterModule(object):
                     if isinstance(value, list):
                         value = cls.nftables_format_list(value)
 
+                        # special cases
+                        if field_dst == 'proto':
+                            value = f"{special_cases['proto']} {value}"
+
+                            if value.find('icmp') == -1:
+                                value += ' th'
+
                     elif field_dst in config['quote'] and value.find('"') == -1:
                         value = f'"{value}"'
 
                     if isinstance(value, str):
                         value.strip()
 
-                    if field_dst in config['remove']:
+                    if field_dst in config['remove']['key']:
                         translation[field_dst] = value
+
+                    elif field_dst in config['remove']['value']:
+                        translation[field_dst] = field_dst
+
+                    elif field_dst in config['remove']['value_bool']:
+                        if 'append' in config['remove']['value_bool'][field_dst] and \
+                                value not in [True, False]:
+                            translation[field_dst] = f"{field_dst} {config['remove']['value_bool'][field_dst]['append']} {value}"
+
+                        else:
+                            translation[field_dst] = field_dst
 
                     else:
                         translation[field_dst] = f"{field_dst} {value}"
 
+                    for inc_set in config['incompatible']:
+                        if field_dst in inc_set:
+                            for field in inc_set:
+                                if field != field_dst and field in translation:
+                                    translation.pop(field)
+
                     break
 
         # add generic logging for any dropped packets
-        if config['drop_log'] and translation['action'] == 'drop' \
-                and 'log prefix' not in mapping:
+        if config['drop_log'] and 'action' in translation and \
+                translation['action'] == 'drop' and 'log prefix' not in mapping:
             if 'comment' in translation:
                 _comment = translation['comment'].replace('comment ', '')
 
@@ -70,6 +104,12 @@ class FilterModule(object):
                 _comment = f"\"{config['drop_log_prefix']}\""
 
             translation['log prefix'] = f"log prefix {_comment}"
+
+        # special cases
+        if 'type' not in translation and 'proto' in translation \
+                and translation['proto'].find('icmp') != -1 and \
+                translation['proto'].find(special_cases['proto']) == -1:
+            translation['proto'] = f"{special_cases['proto']} {translation['proto']}"
 
         # concat the rule in its designated field-sequence
         translated_rule = ''
@@ -85,6 +125,8 @@ class FilterModule(object):
         NONE_VALUES = ['', ' ', None]
 
         for rule in raw_rules:
+            _translated = None
+
             # pass raw rules directly (either as 'raw' key or only string)
             if not isinstance(rule, (dict, str)):
                 raise ValueError(
@@ -95,14 +137,20 @@ class FilterModule(object):
             elif isinstance(rule, str):
                 _translated = rule
 
-            elif 'raw' in rule:
-                _translated = rule['raw']
-
             else:
-                _translated = cls._translate_rule(
-                    rule=rule,
-                    config=translate_config,
-                )
+                raw = False
+
+                for raw_key in translate_config['raw_key']:
+                    if raw_key in rule:
+                        _translated = rule[raw_key]
+                        raw = True
+                        break
+
+                if not raw:
+                    _translated = cls._translate_rule(
+                        rule=rule,
+                        config=translate_config,
+                    )
 
             if _translated in NONE_VALUES:
                 continue
@@ -215,5 +263,14 @@ class FilterModule(object):
 
         if config['counter']:
             lines.append('counter')
+
+        return f";\n{' ' * whitespace}".join(lines)
+
+    @classmethod
+    def nftables_format_counter(cls, config: dict, whitespace: int) -> str:
+        lines = []
+
+        if 'comment' in config:
+            lines.append(f"comment \"{config['comment']}\"")
 
         return f";\n{' ' * whitespace}".join(lines)

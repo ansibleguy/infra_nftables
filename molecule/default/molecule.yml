@@ -1,6 +1,6 @@
 ---
 
-references:
+_references:
   docker:
     all: &docker_all
       docker_host: 'tcp://molecule-docker.local:2375'
@@ -19,22 +19,36 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: test-ag-nftables-tester-${USER}
+  - name: test-ag-nftables-tester
     docker_networks:
-      - name: 'test-ag-nftables-${USER}'
+      - name: 'test-ag-nftables'
         ipam_config:
           - subnet: '192.168.9.0/24'
             gateway: '192.168.9.254'
     networks:
-      - name: 'test-ag-nftables-${USER}'
+      - name: 'test-ag-nftables'
         ipv4_address: '192.168.9.1'
-    groups: [grp_tester]
+    groups: [grp_targets]
     <<: *docker_all
 
-  - name: test-ag-nftables-1-${USER}
+  - name: test-ag-nftables-1
     networks:
-      - name: 'test-ag-nftables-${USER}'
+      - name: 'test-ag-nftables'
         ipv4_address: '192.168.9.2'
+    groups: [grp_targets]
+    <<: *docker_all
+
+  - name: test-ag-nftables-2
+    networks:
+      - name: 'test-ag-nftables'
+        ipv4_address: '192.168.9.3'
+    groups: [grp_targets]
+    <<: *docker_all
+
+  - name: test-ag-nftables-3
+    networks:
+      - name: 'test-ag-nftables'
+        ipv4_address: '192.168.9.4'
     groups: [grp_targets]
     <<: *docker_all
 

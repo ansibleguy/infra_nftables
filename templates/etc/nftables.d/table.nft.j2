@@ -1,56 +1,33 @@
 #!/usr/sbin/nft -f
 
 table {{ nft_table.type }} {{ nft_table_name }} {
-{%   if nft_table.vars | length > 0 %}
-    # vars
-{%   endif %}
-{% for k, v in nft_table.vars.items()
-  {{ k | nftables_format_var(v) }}
-{% endfor %}
-{%   if nft_table.sets | length > 0 %}
-  # sets
-{%   endif %}
-{%   for k, v in nft_table.sets.items()
-  set {
-    {{ v | nftables_format_set(4) }}
-  }
-{%   endfor %}
+{% include "_includes/definition_table.j2" %}
 
-{% for nft_chain_name, nft_chain_item in nft_table.chains.items() %}
-{%   set nft_chain = defaults_chain | combine(nftables.defaults.chain | default({})) | combine(nft_chain_item) %}
-{%   set nft_chain_main = nft_chain.hook is not none %}
-
-{% if nft_chain_main %}
-    type {{ nft_chain.type }} hook {{ nft_chain.hook }} priority {{ nft_chain.priority }}; policy {{ nft_chain.policy }};
-
+{% for chain_name, chain_item in nft_table.chains.items() %}
+{%   set chain = defaults_chain | combine(nftables.defaults.chain | default({}), recursive=true) | combine(chain_item, recursive=true) %}
+{%   set chain_main = chain.hook is not none %}
+{%   set chain_rules = chain.rules | nftables_merge_sort_translate_rules(NFT_CONFIG, nft_table, chain_name, NFT_HC) %}
+  chain {{ chain_name }} {
+{% if chain_main %}
+    type {{ chain.type }} hook {{ chain.hook }} priority {{ chain.priority }}; policy {{ chain.policy }};
 {% endif %}
+{%   include "_includes/definition_chain.j2" %}
 
-{%   if nft_chain.vars | length > 0 %}
-    # vars
-{%   endif %}
-{%   for k, v in nft_chain.vars.items()
-    {{ k | nftables_format_var(v) }}
-{%   endfor %}
+{%   if chain_rules | length > 0 %}
 
-{%   if nft_chain.sets | length > 0 %}
-    # sets
-{%   endif %}
-{%   for k, v in nft_chain.sets.items()
-    set {
-      {{ v | nftables_format_set(6) }}
-    }
-{%   endfor %}
-
-{% for rule in nft_chain.rules | nftables_merge_sort_translate_rules(NFT_CONFIG, nft_table, nft_chain_name, NFT_HC) %}
+    # rules
+{%     for rule in chain_rules %}
     {{ rule }}
-{% endfor %}
+{%     endfor %}
+{%   endif %}
 
-{%   if nft_chain.counter %}
-    counter comment "COUNT {{ nft_table_name }}-{{ nft_chain_main }}{% if nft_chain_main %}-{{ chain.policy }}{% endif %}"
+{%   if chain.counter %}
+    counter comment "COUNT {{ nft_table_name }}-{{ chain_name }}{% if chain_main %}-{{ chain.policy }}{% endif %}"
 {%   endif %}
-{%   if nft_chain_main and nft_chain.log.drop and nft_chain.policy == 'drop' %}
-    log prefix "DROP {{ nft_table_name }}-{% if nft_chain.log.prefix %}{{ nft_chain.log.prefix }}{% else %}{{ nft_chain_main }}{% endif %} "
+{%   if chain_main and chain.log.drop and chain.policy == 'drop' %}
+    log prefix "DROP {{ nft_table_name }}-{% if chain.log.prefix %}{{ chain.log.prefix }}{% else %}{{ chain_name }}{% endif %} "
 {%   endif %}
+  }
 
 {% endfor %}
 }

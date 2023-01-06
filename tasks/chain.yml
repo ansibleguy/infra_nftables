@@ -1,0 +1,25 @@
+---
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Chain '{{ nft_chain_name }}' | Checking config"
+  ansible.builtin.assert:
+    that: >
+      nft_chain.type in NFT_HC.choices.chain.types and
+      nft_chain.hook in NFT_HC.choices.hook[nft_table.type][nft_chain.type] and
+      nft_chain.priority in NFT_HC.choices.priorities and
+      nft_chain.rules |
+      nftables_merge_rules(NFT_CONFIG, nft_table, nft_chain_name) |
+      nftables_unique_sequence(NFT_HC.rules.sort)
+  ignore_errors: true
+  register: nft_config_check_chain
+
+- name: "NFTables | Table '{{ nft_table_name }}' | Chain '{{ nft_chain_name }}' | Informing user"
+  ansible.builtin.fail:
+    msg: "Chain config seems to be invalid!
+    Make sure these rules are followed:
+    1. Chain type is defined and valid ({{ NFT_HC.choices.chain.types | join(', ') }}),
+    2. Chain hook is valid for the current table type ({{ NFT_HC.choices.hook[nft_table.type][nft_chain.type] | default([]) | join(', ') }}),
+    3. Chain priority is valid ({{ NFT_HC.choices.priorities | join(', ') }}),
+    4. Rules have no duplicate sequence configured"
+  when:
+    - nft_config_check_chain.failed is defined
+    - nft_config_check_chain.failed

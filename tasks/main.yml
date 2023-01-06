@@ -6,6 +6,72 @@
       - nftables is defined
       - nftables.tables is defined
 
-- name: NFTables | Processing debian config
-  ansible.builtin.import_tasks: debian/main.yml
-  when: "ansible_distribution|lower in ['debian', 'ubuntu']"
+- name: NFTables | Pulling info on installed packages
+  ansible.builtin.package_facts:
+    manager: auto
+  ignore_errors: true
+  register: nft_packages
+
+- name: "NFTables | Failing if incompatible packages are installed ({{ NFT_HC.incompatible_packages | join(', ') }})"
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.packages | instersect(NFT_HC.incompatible_packages) | length == 0
+  when:
+    - nft_packages.failed is undefined or not nft_packages.failed
+    - "'packages' in ansible_facts and 'nftables' not in ansible_facts.packages"
+
+- name: NFTables | Installing
+  ansible.builtin.package:
+    name: ['nftables']
+    state: present
+
+- name: NFTables | Adding config directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ NFT_HC.path.config_dir }}"
+    mode: 0750
+    owner: 'root'
+    group: 'root'
+
+- name: NFTables | Copying base config
+  ansible.builtin.template:
+    src: "templates{{ NFT_HC.path.base_file }}.j2"
+    dest: "{{ NFT_HC.path.base_file }}"
+    mode: 0640
+    owner: 'root'
+    group: 'root'
+    validate: 'nft -cf %s'
+  notify: Restart-nftables
+
+- name: NFTables | Checking for existing config-files
+  ansible.builtin.command: "ls {{ NFT_HC.path.config_dir }}"
+  register: nft_config_files
+  changed_when: false
+  when: NFT_CONFIG.settings.purge
+
+- name: NFTables | Purging unmanaged config-files
+  ansible.builtin.file:
+    path: "{{ NFT_HC.path.config_dir }}/{{ item }}"
+    state: absent
+  when:
+    - NFT_CONFIG.settings.purge
+    - item | split('.') | first not in NFT_CONFIG.tables
+  loop: "{{ nft_config_files.stdout_lines }}"
+
+- name: NFTables | Tables
+  ansible.builtin.include_tasks: table.yml
+  vars:
+    nft_table_name: "{{ nft_table_item.key | nftables_safe_name }}"
+    nft_table: "{{ defaults_table |
+    combine(NFT_CONFIG._defaults.table, recursive=true) |
+    combine(nft_table_item.value, recursive=true) }}"
+  loop_control:
+    loop_var: nft_table_item
+  with_dict: "{{ NFT_CONFIG.tables }}"
+  no_log: true  # less verbose output
+
+- name: NFTables | Enabling/Starting service
+  ansible.builtin.service:
+    name: 'nftables'
+    enabled: true
+    state: started

@@ -1,8 +1,61 @@
 ---
 
 - name: Converge
-  hosts: grp_targets  # {{ lookup('ansible.builtin.env', 'USER') }}
-  #  vars:
+  hosts: "test-ag-nftables-1"
+  vars:
+    nftables:
+      tables:
+        example:
+          vars:
+            var_test: '1.1.1.1'
+            private_ranges: ['192.168.0.0/16', '172.16.0.0/12', '10.0.0.0/8']
+            dns_servers: ['1.1.1.1', '1.1.0.0', '8.8.8.8', '8.8.4.4']
+
+          sets:
+            set_test:
+              flags: ['dynamic', 'timeout']
+              settings:
+                timeout: '3m'
+
+          counters:
+            invalid_packages:
+              comment: 'Invalid'
+
+          chains:
+            iny:
+              vars:
+                var_test_c: '1.1.1.1'
+
+              hook: 'input'
+              rules:
+                - sequence: 1
+                  raw: 'ct state invalid counter name invalid_packages log prefix "DROP invalid sates" drop'
+                - seq: 2
+                  raw: 'ct state {established, related} counter accept comment "Allow open sessions"'
+                - s: 3
+                  raw: 'iifname "lo" accept comment "Allow loopback traffic"'
+                - 'icmp type { echo-request} limit rate 5/second accept comment "Allow icmp-ping"'
+                - 'icmpv6 type { echo-request} limit rate 5/second accept comment "Allow icmp-ping"'
+                - 'icmp code 30 limit rate 5/second accept comment "Allow icmp-traceroute"'
+                - 'icmpv6 type { nd-neighbor-solicit, nd-router-advert, nd-neighbor-advert } accept comment "Allow necessary icmpv6-types for ipv6 to work"'
+                - {proto: 'udp', port: 46251, counter: 'invalid_packages'}
+
+            outy:
+              hook: 'output'
+              policy: 'accept'
+              rules:
+                - {dest: '$dns_servers', proto: 'udp', port: 53}
+                - {dest: '$dns_servers', proto: 'tcp', port: [53, 853]}
+                - {proto: ['tcp', 'udp'], port: [80, 443]}
+                - {proto: ['icmp', 'icmpv6']}
+
+            naty:
+              hook: 'postrouting'
+              type: 'nat'
+              policy: 'accept'
+              rules:
+                - {'src': '$private_ranges', oif: 'eno2', masquerade: true}  # dynamic outbound nat
+                - {'src': '$private_ranges', oif: 'eno3', snat: '192.168.0.1'}  # static outbound nat
 
   roles:
-    - ansibleguy.ROLE
+    - ansibleguy.infra_nftables
