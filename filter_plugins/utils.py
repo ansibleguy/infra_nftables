@@ -10,6 +10,7 @@ class FilterModule(object):
             "nftables_format_list": self.nftables_format_list,
             "nftables_format_var": self.nftables_format_var,
             "nftables_format_counter": self.nftables_format_counter,
+            "nftables_format_limit": self.nftables_format_limit,
             "nftables_safe_name": self.nftables_safe_name,
             "nftables_format_set": self.nftables_format_set,
             "nftables_merge_rules": self.nftables_merge_rules,
@@ -80,8 +81,19 @@ class FilterModule(object):
                                 value not in [True, False]:
                             translation[field_dst] = f"{field_dst} {config['remove']['value_bool'][field_dst]['append']} {value}"
 
+                        elif 'append' not in config['remove']['value_bool'][field_dst] and \
+                                value not in [True, False]:
+                            translation[field_dst] = f"{field_dst} {value}"
+
                         else:
                             translation[field_dst] = field_dst
+
+                    elif field_dst in config['remove']['value_find']:
+                        if value.find(config['remove']['value_find'][field_dst]['find']) == -1:
+                            translation[field_dst] = f"{field_dst} {config['remove']['value_find'][field_dst]['append']} {value}"
+
+                        else:
+                            translation[field_dst] = f"{field_dst} {value}"
 
                     else:
                         translation[field_dst] = f"{field_dst} {value}"
@@ -106,7 +118,7 @@ class FilterModule(object):
             translation['log prefix'] = f"log prefix {_comment}"
 
         # special cases
-        if 'type' not in translation and 'proto' in translation \
+        if 'type' not in translation and 'code' not in translation and 'proto' in translation \
                 and translation['proto'].find('icmp') != -1 and \
                 translation['proto'].find(special_cases['proto']) == -1:
             translation['proto'] = f"{special_cases['proto']} {translation['proto']}"
@@ -264,13 +276,30 @@ class FilterModule(object):
         if config['counter']:
             lines.append('counter')
 
+        return cls._format_lines(whitespace=whitespace, lines=lines)
+
+    @staticmethod
+    def _format_lines(lines: list, whitespace: int) -> str:
         return f";\n{' ' * whitespace}".join(lines)
+
+    @staticmethod
+    def _format_comment(comment: str) -> str:
+        return f"comment \"{comment}\""
 
     @classmethod
     def nftables_format_counter(cls, config: dict, whitespace: int) -> str:
         lines = []
 
         if 'comment' in config:
-            lines.append(f"comment \"{config['comment']}\"")
+            lines.append(cls._format_comment(config['comment']))
 
-        return f";\n{' ' * whitespace}".join(lines)
+        return cls._format_lines(whitespace=whitespace, lines=lines)
+
+    @classmethod
+    def nftables_format_limit(cls, config: dict, whitespace: int) -> str:
+        lines = [f"rate {config['rate']}"]
+
+        if 'comment' in config:
+            lines.append(cls._format_comment(config['comment']))
+
+        return cls._format_lines(whitespace=whitespace, lines=lines)

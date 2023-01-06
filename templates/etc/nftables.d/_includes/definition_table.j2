@@ -17,9 +17,18 @@
 {% if nft_table.counters | length > 0 %}
 
   # counters
-{%   for k, v in nft_table.counters.items() %}
+{%   for k in nft_table.counters %}
   counter {{ k }} {
-    {{ v | nftables_format_counter(6) }}
+    {{ nft_table.counters[k] | nftables_format_counter(6) }}
+  }
+{%   endfor %}
+{% endif %}
+{% if nft_table.limits | length > 0 %}
+
+  # limits
+{%   for k in nft_table.limits %}
+  limit {{ k }} {
+    {{ nft_table.limits[k] | nftables_format_limit(6) }}
   }
 {%   endfor %}
 {% endif %}

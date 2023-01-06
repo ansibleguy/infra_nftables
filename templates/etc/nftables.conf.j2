@@ -4,8 +4,12 @@
 
 flush ruleset
 
-{% for k, v in NFT_CONFIG.vars.items() %}
+{% if NFT_CONFIG.vars | length > 0 %}
+
+# global vars
+{%   for k, v in NFT_CONFIG.vars.items() %}
 {{ k | nftables_format_var(v) }}
-{% endfor %}
+{%   endfor %}
+{% endif %}
 
 include "{{ NFT_HC.path.config_dir }}/*.nft"

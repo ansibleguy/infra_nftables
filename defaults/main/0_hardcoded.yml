@@ -50,14 +50,15 @@ NFT_HC:
 
   rules:
     sort:
-      fields: ['s', 'seq', 'sequence', 'id']
+      fields: ['s', 'id', 'seq', 'sequence']
       fallback: 1000
 
     translate:
       # sequence of fields needed in nft config
       sequence: [
-        'iifname', 'oifname', 'proto', 'type', 'dport', 'ip daddr', 'sport', 'ip saddr',
-        'log prefix', 'counter', 'action', 'masquerade', 'snat to', 'dnat to', 'comment',
+        'iifname', 'oifname', 'proto', 'type', 'code', 'dport', 'ip daddr', 'sport',
+        'ip saddr', 'log prefix', 'counter', 'limit',
+        'action', 'masquerade', 'snat to', 'dnat to', 'comment',
       ]
 
       aliases:  # config to nft field translation
@@ -70,18 +71,24 @@ NFT_HC:
         'log prefix': ['log', 'l']
         comment: ['cmt', 'c']
         type: ['t']
+        code: ['co']
         action: ['a']
         proto: ['pr', 'protocol']
         counter: ['count']
         'snat to': ['snat', 'src_nat', 'source_nat', 'outbound_nat']
         'dnat to': ['dnat', 'dest_nat', 'destination_nat']
         masquerade: ['masque', 'm']
+        limit: ['lim']
 
-      remove:
+      remove:  # some special cases
         key: ['proto', 'action']
         value: ['masquerade']
         value_bool:
           counter:
+            append: 'name'
+        value_find:  # append if not found
+          limit:
+            find: '/'
             append: 'name'
 
       # values should be in quotes

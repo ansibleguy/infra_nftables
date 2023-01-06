@@ -25,7 +25,7 @@ table {{ nft_table.type }} {{ nft_table_name }} {
     counter comment "COUNT {{ nft_table_name }}-{{ chain_name }}{% if chain_main %}-{{ chain.policy }}{% endif %}"
 {%   endif %}
 {%   if chain_main and chain.log.drop and chain.policy == 'drop' %}
-    log prefix "DROP {{ nft_table_name }}-{% if chain.log.prefix %}{{ chain.log.prefix }}{% else %}{{ chain_name }}{% endif %} "
+    log prefix "DROP {{ nft_table_name }}-{% if chain.log.prefix %}{{ chain.log.prefix }}{% else %}{{ chain_name }}{% endif %}"
 {%   endif %}
   }
 

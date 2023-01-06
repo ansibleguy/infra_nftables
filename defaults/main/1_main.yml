@@ -30,19 +30,21 @@ defaults_table:
       # rules:
       #   chain1: ['rule1', 'rule2']
 
+  # definitions on table-level
   vars: {}
   sets: {}
   counters: {}
+  limits: {}
 
 defaults_chain:
   type: 'filter'  # filter, route, nat
-  hook: none  # input, output, forward, prerouting, postrouting, ingress
+  hook:  # input, output, forward, prerouting, postrouting, ingress
   policy: 'drop'
   priority: 0  # lower=better; -400, -300, -225, -200, -150, -100, 50, 100, 225, 300
   counter: true
   log:
     drop: true
-    prefix: none
+    prefix:
 
   rules: []
   vars: {}

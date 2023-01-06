@@ -20,6 +20,8 @@ Role to provision NFTables firewall on linux servers.
 
 NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)
 
+Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/main/Example.md)!
+
 ## Functionality
 
 * **Package installation**
@@ -28,12 +30,15 @@ NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_referen
 
 
 * **Configuration**
-  * Possibility to define **variables, sets and counters** on table level
-  * Possibility to define **variables** on chain level
+  * Possibility to define
+    * **variables** on global level
+    * **variables, sets, counters and limits** on table level
+    * **variables** on chain level
   * **Config will be validated** before being written
 
 
   * **Default config**:
+    * No rules are added by default
     * tables
       * table-type = inet
     * chains
@@ -45,18 +50,15 @@ NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_referen
     * sets
       * set-type = ipv4_addr
       * add counter = yes
- 
+    * rules
+      * policy = accept
+      * logging drops = yes
+
 
   * **Default opt-ins**:
     * Purging of unmanaged config-files stored in '/etc/nftables.d/'
 
 ## Info
-
-* **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure hooks and priorities!
-
-
-* **Info:** Check out the **config [Example](https://github.com/ansibleguy/infra_nftables/blob/main/Example.md)**.
-
 
 * **Note:** Most of the role's functionality can be opted in or out.
 
@@ -66,9 +68,7 @@ NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_referen
 * **Warning:** Not every setting/variable you provide will be checked for validity. Bad config might break the role!
 
 
-* **Info:** Special/complex rules cannot be configured using the rule-dictionary.
-
-  You can use the 'raw' key to provide any custom rule that will be added to the ruleset directly.
+* **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure **hooks and priorities**!
 
 
 * **Info:** If you want to use **Fail2Ban with NFTables**, you should check out this [Documentation](https://github.com/ansibleguy/infra_nftables/blob/main/Fail2Ban.md).
@@ -81,13 +81,64 @@ NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_referen
   * The installed nftables version may be too old to use a feature/functionality (_nat chain on Debian 10_)
 
 
-## Setup
+* **Info:** Rules can be provided in dictionary format as seen in the examples.
 
-For this role to work - you must install its dependencies first:
+  These are the available fields and aliases:
 
-```
-ansible-galaxy install -r requirements.yml
-```
+  | Function                    | Keys                                               | Note                                                                                                                                                                                                               |
+  |----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
+  | Rule sequence                           | s, id, seq, sequence                                   | The sequence-id (_integer_) to sort the rules inside a chain. If none is provided one will be auto-generated beginning at 1000. If a duplicate sequence id is provided the role will fail its config-check!        |
+  | Input interface             | if, iif, iifname                                   | -                                                                                                                                                                                                                  |
+  | Output interface            | of, oif, oifname                                   | -                                                                                                                                                                                                                  |
+  | Protocol                    | proto, pr, protocol                                | -                                                                                                                                                                                                                  |
+  | Protocol sub-type           | t, type                                            | -                                                                                                                                                                                                                  |
+  | Protocol sub-code           | co, code                                            | -                                                                                                                                                                                                                  |
+  | Destination Address/Network | d, dest, target, destination, 'ip daddr'           | -                                                                                                                                                                                                                  |
+  | Destination Port            | dp, port, dport, dest_port                         | -                                                                                                                                                                                                                  |
+  | Source Address/Network      | s, src, source, 'ip saddr'                         | -                                                                                                                                                                                                                  |
+  | Source Port                 | sp, sport, sport, src_port                         | -                                                                                                                                                                                                                  |
+  | Logging / Log message       | l, log, 'log prefix'                               | If set to 'True' and a 'comment' is provided, it will be used as message. Else no message will be used                                                                                                             |
+  | Traffic counter             | count, counter                                     | If set to 'True' a rule-specific counter will be used. Else it will use the provided pre-defined counter                                                                                                           |
+  | Traffic Limit               | lim, limit                                         | A limit to set for the rule, see: [Anonymous Limits](https://wiki.nftables.org/wiki-nftables/index.php/Rate_limiting_matchings) and [Pre-defined Limits](https://wiki.nftables.org/wiki-nftables/index.php/Limits) |
+  | Rule action                 | a, action                                          | If no action is provided, it will default to 'accept'                                                                                                                                                              | 
+  | Source NAT masquerading     | m, masque, masquerade                              | If NAT masquerading should be used                                                                                                                                                                                 |
+  | Source NAT                  | snat, src_nat, source_nat, outbound_nat, 'snat to' | -                                                                                                                                                                                                                  |
+  | Destination NAT             | dnat, dest_nat, destination_nat, 'dnat to'         | -                                                                                                                                                                                                                  |
+  | Rule comment                | c, cmt, comment                                    | -                                                                                                                                                                                                                  |
+
+  Only one of Action, Source-NAT, Masquerading or Destination-NAT can be set for one rule!
+
+
+* **Info:** Special/complex rules cannot be configured using the rule-dictionary.
+
+  You can use the 'raw' key to provide any custom rule that will be added to the ruleset directly.
+
+
+* **Info:** You can define **variables, sets, counters and limits** on table-level.
+
+  * **Variables** are key-value pairs.
+    ```yaml
+    var-name: var-value
+    var2-name: ['value1', 'value2']
+    ```
+  * **Sets** have this structure:
+    ```yaml
+    set-name:
+      flags: [list-of-flags]  # optional
+      settings:
+        setting: value  # optional
+    ```
+  * **Counters** have this structure:
+    ```yaml
+    counter-name:
+      comment: text  # optional
+    ```
+  * **Limits** have this structure:
+    ```yaml
+    limit-name:
+      rate: 'over 1024 bytes/second burst 512 bytes'
+      comment: text  # optional
+    ```
 
 ## Usage
 
@@ -143,10 +194,11 @@ nftables:
               raw: 'ct state {established, related} counter accept comment "Allow open sessions"'
             - s: 3
               raw: 'iifname "lo" accept comment "Allow loopback traffic"'
-            - 'icmp type { echo-request} limit rate 5/second accept comment "Allow icmp-ping"'
-            - 'icmpv6 type { echo-request} limit rate 5/second accept comment "Allow icmp-ping"'
-            - 'icmp code 30 limit rate 5/second accept comment "Allow icmp-traceroute"'
-            - 'icmpv6 type { nd-neighbor-solicit, nd-router-advert, nd-neighbor-advert } accept comment "Allow necessary icmpv6-types for ipv6 to work"'
+            - {proto: 'icmp', type: 'echo-request', limit: 'rate 10/second', comment: 'Allow icmp-ping'}
+            - {proto: 'icmpv6', type: 'echo-request', limit: 'rate 10/second', comment: 'Allow icmp-ping'}
+            - {proto: 'icmp', code: 30, limit: 'rate 10/second', comment: 'Allow icmp-traceroute'}
+            - {proto: 'icmpv6', limit: 'rate 10/second', comment: 'Allow necessary icmpv6-types for ipv6 to work',
+               type: ['nd-neighbor-solicit', 'nd-router-advert', 'nd-neighbor-advert']}
             - {proto: 'udp', port: 46251, counter: 'invalid_packages'}
 
         outgoing:

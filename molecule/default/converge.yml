@@ -4,6 +4,9 @@
   hosts: "test-ag-nftables-1"
   vars:
     nftables:
+      vars:
+        global_var_test: '1.1.1.1'
+
       tables:
         example:
           vars:
@@ -21,10 +24,14 @@
             invalid_packages:
               comment: 'Invalid'
 
+          limits:
+            icmp_limit:
+              rate: '10/second'
+
           chains:
-            iny:
+            incoming:
               vars:
-                var_test_c: '1.1.1.1'
+                chain_var: '1.1.1.1'
 
               hook: 'input'
               rules:
@@ -34,13 +41,14 @@
                   raw: 'ct state {established, related} counter accept comment "Allow open sessions"'
                 - s: 3
                   raw: 'iifname "lo" accept comment "Allow loopback traffic"'
-                - 'icmp type { echo-request} limit rate 5/second accept comment "Allow icmp-ping"'
-                - 'icmpv6 type { echo-request} limit rate 5/second accept comment "Allow icmp-ping"'
-                - 'icmp code 30 limit rate 5/second accept comment "Allow icmp-traceroute"'
-                - 'icmpv6 type { nd-neighbor-solicit, nd-router-advert, nd-neighbor-advert } accept comment "Allow necessary icmpv6-types for ipv6 to work"'
-                - {proto: 'udp', port: 46251, counter: 'invalid_packages'}
+                - {proto: 'icmp', type: 'echo-request', limit: 'icmp_limit', comment: 'Allow icmp-ping'}
+                - {proto: 'icmpv6', type: 'echo-request', limit: 'icmp_limit', comment: 'Allow icmp-ping'}
+                - {proto: 'icmp', code: 30, limit: 'icmp_limit', comment: 'Allow icmp-traceroute'}
+                - {proto: 'icmpv6', limit: 'icmp_limit', comment: 'Allow necessary icmpv6-types for ipv6 to work',
+                   type: ['nd-neighbor-solicit', 'nd-router-advert', 'nd-neighbor-advert']}
+                - {proto: 'udp', port: 46251, counter: 'invalid_packages', action: 'drop'}
 
-            outy:
+            outgoing:
               hook: 'output'
               policy: 'accept'
               rules:
@@ -49,7 +57,7 @@
                 - {proto: ['tcp', 'udp'], port: [80, 443]}
                 - {proto: ['icmp', 'icmpv6']}
 
-            naty:
+            translate:
               hook: 'postrouting'
               type: 'nat'
               policy: 'accept'
