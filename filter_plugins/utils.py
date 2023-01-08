@@ -61,7 +61,8 @@ class FilterModule(object):
                         if field_dst == 'proto':
                             value = f"{special_cases['proto']} {value}"
 
-                            if value.find('icmp') == -1:
+                            if value.find('icmp') == -1 and \
+                                    ('dport' in mapping or 'sport' in mapping):
                                 value += ' th'
 
                     elif field_dst in config['quote'] and value.find('"') == -1:
@@ -122,6 +123,11 @@ class FilterModule(object):
                 and translation['proto'].find('icmp') != -1 and \
                 translation['proto'].find(special_cases['proto']) == -1:
             translation['proto'] = f"{special_cases['proto']} {translation['proto']}"
+
+        # add ending space for log prefix
+        if 'log' in translation and translation['log'].find('prefix') != -1 and \
+                translation['log'].endswith('"'):
+            translation['log'] = f"{translation['log'][:-1]} \""
 
         # concat the rule in its designated field-sequence
         translated_rule = ''

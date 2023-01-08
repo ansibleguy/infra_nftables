@@ -1,4 +1,4 @@
-<a href="https://netfilter.org">
+<a href="https://netfilter.org/projects/nftables/index.html">
 <img src="https://netfilter.org/images/netfilter-logo3.png" alt="NFTables logo" width="400"/>
 </a>
 
@@ -18,9 +18,9 @@ Role to provision NFTables firewall on linux servers.
 
 ## Documentation
 
-NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)
-
-Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/main/Example.md)!
+* NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)
+* Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/main/Example.md)!
+* Integration of [Fail2Ban with NFTables](https://github.com/ansibleguy/infra_nftables/blob/main/Fail2Ban.md)
 
 ## Functionality
 
@@ -69,9 +69,6 @@ Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/main/E
 
 
 * **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure **hooks and priorities**!
-
-
-* **Info:** If you want to use **Fail2Ban with NFTables**, you should check out this [Documentation](https://github.com/ansibleguy/infra_nftables/blob/main/Fail2Ban.md).
 
 
 * **Info:** If you encounter the error message 'No such file or directory' when config is written/validated it can indicate a problem with:
