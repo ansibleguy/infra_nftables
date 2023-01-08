@@ -7,7 +7,7 @@ NFT_HC:
 
   choices:
     table:
-      types: ['inet', 'ip6', 'ip4', 'arp', 'bridge', 'netdev']
+      types: ['inet', 'ip6', 'ip', 'arp', 'bridge', 'netdev']
 
     chain:
       types: ['filter', 'nat', 'route']
