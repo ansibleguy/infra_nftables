@@ -21,6 +21,7 @@ Role to provision NFTables firewall on linux servers.
 * NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)
 * Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/main/Example.md)!
 * Integration of [Fail2Ban with NFTables](https://github.com/ansibleguy/infra_nftables/blob/main/Fail2Ban.md)
+* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md)
 
 ## Functionality
 
@@ -38,6 +39,9 @@ Role to provision NFTables firewall on linux servers.
 
 
   * **Default config**:
+    * Enabled features (_must be supported by kernel_)
+      * Sets
+      * NAT
     * No rules are added by default
     * tables
       * table-type = inet
@@ -58,6 +62,9 @@ Role to provision NFTables firewall on linux servers.
   * **Default opt-ins**:
     * Purging of unmanaged config-files stored in '/etc/nftables.d/'
 
+  * **Default opt-outs**:
+    * Installing NFTables from Debian 11 backports when running on Debian 10 (_newer version_)
+
 ## Info
 
 * **Note:** Most of the role's functionality can be opted in or out.
@@ -69,13 +76,6 @@ Role to provision NFTables firewall on linux servers.
 
 
 * **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure **hooks and priorities**!
-
-
-* **Info:** If you encounter the error message 'No such file or directory' when config is written/validated it can indicate a problem with:
-
-  * Missing objects like tables, chains, variables, sets or counters
-  * You may have a typo in such a link
-  * The installed nftables version may be too old to use a feature/functionality (_nat chain on Debian 10_)
 
 
 * **Info:** Rules can be provided in dictionary format as seen in the examples.
@@ -137,6 +137,10 @@ Role to provision NFTables firewall on linux servers.
       comment: text  # optional
     ```
 
+## Troubleshoot
+
+* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md)
+
 ## Usage
 
 ### Config
@@ -145,6 +149,11 @@ Define the config as needed:
 
 ```yaml
 nftables:
+  # enable:  # features must be supported by kernel
+  #   sets: true
+  #   nat: true
+  #   deb11_backport: false
+
   _defaults:  # defaults inherited by all tables and chains
     table:
       type: 'inet'

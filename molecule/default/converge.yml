@@ -4,6 +4,9 @@
   hosts: "test-ag-nftables-1"
   vars:
     nftables:
+      enable:
+        sets: false  # debian (11) kernel 5.x does not support it
+
       vars:
         global_var_test: '1.1.1.1'
 
@@ -64,6 +67,12 @@
               rules:
                 - {'src': '$private_ranges', oif: 'eno2', masquerade: true}  # dynamic outbound nat
                 - {'src': '$private_ranges', oif: 'eno3', snat: '192.168.0.1'}  # static outbound nat
+
+  pre_tasks:
+    - name: Installing Role dependencies
+      apt:
+        name: ['kmod']
+        state: present
 
   roles:
     - ansibleguy.infra_nftables

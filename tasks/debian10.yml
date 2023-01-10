@@ -1,0 +1,15 @@
+---
+
+- name: NFTables | Debian 10 | Adding backports repository
+  apt_repository:
+    repo: 'deb http://deb.debian.org/debian buster-backports main contrib non-free'
+    state: 'present'
+    update_cache: true
+    filename: 'buster-backports'
+
+- name: NFTables | Debian 10 | Installing
+  ansible.builtin.apt:
+    name: ['nftables']
+    state: present
+    default_release: 'buster-backports'
+  diff: false

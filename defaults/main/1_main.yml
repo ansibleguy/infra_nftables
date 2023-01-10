@@ -4,6 +4,11 @@ nftables: {}
 
 # default config => is overwritten by provided config
 defaults_nftables:
+  enable:
+    sets: true
+    nat: true
+    deb11_backport: false
+
   _defaults:
     table: {}
     chain: {}

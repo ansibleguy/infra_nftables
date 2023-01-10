@@ -1,0 +1,33 @@
+---
+
+- name: NFTables | Check | Pulling kernel config
+  ansible.builtin.shell: 'cat "/boot/config-$(uname -r)" | grep -E "CONFIG_NFT|CONFIG_NF_TABLES"'
+  args:
+    executable: '/bin/bash'
+  register: nft_kernel_config
+  changed_when: false
+  check_mode: false
+  tags: skip_ansible_lint  # 'set -o pipefail' will lead to no output
+  when: >
+    ansible_virtualization_role is undefined or
+    ansible_virtualization_role != 'guest' or
+    'docker' not in ansible_virtualization_tech_guest
+
+- name: NFTables | Check | Checking kernel config
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES=m' in nft_kernel_config.stdout_lines"
+      - "'CONFIG_NF_TABLES_INET=y' in nft_kernel_config.stdout_lines"
+      - "'CONFIG_NF_TABLES_IPV4=y' in nft_kernel_config.stdout_lines"
+
+- name: NFTables | Checking kernel config for sets
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES_SET=m' in nft_kernel_config.stdout_lines"
+  when: NFT_CONFIG.enable.sets
+
+- name: NFTables | Checking kernel config for nat
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_NAT=m' in nft_kernel_config.stdout_lines"
+  when: NFT_CONFIG.enable.nat
