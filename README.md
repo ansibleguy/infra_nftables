@@ -16,6 +16,15 @@ Role to provision NFTables firewall on linux servers.
 **Tested:**
 * Debian 11
 
+## Install
+
+```bash
+ansible-galaxy install ansibleguy.infra_nftables
+
+# or to custom role-path
+ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
+```
+
 ## Documentation
 
 * NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)

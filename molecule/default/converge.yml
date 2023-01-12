@@ -74,5 +74,10 @@
         name: ['kmod']
         state: present
 
+    - name: Test Utils
+      apt:
+        name: ['python3-nftables', 'nano']
+        state: present
+
   roles:
     - ansibleguy.infra_nftables
