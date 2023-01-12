@@ -3,11 +3,12 @@
 - name: Verify
   hosts: grp_tester
   gather_facts: false
-  tasks: []
-  #  - name: Checking if zoneminder web-service is reachable
-  #    ansible.builtin.uri:
-  #      url: 'https://192.168.0.2'
-  #      return_content: yes
-  #      validate_certs: false
-  #    register: page
-  #    failed_when: "'Zoneminder' not in page.content"
+  tasks:
+    - name: Pulling existing rules
+      ansible.builtin.command: 'nft list ruleset'
+      register: ruleset
+
+    - name: Checking rules
+      ansible.builtin.assert:
+        that:
+          -

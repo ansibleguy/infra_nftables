@@ -1,0 +1,9 @@
+---
+
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Installing Role dependencies
+      apt:
+        name: ['kmod']
+        state: present

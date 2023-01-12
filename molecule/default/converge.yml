@@ -50,6 +50,37 @@
                 - {proto: 'icmpv6', limit: 'icmp_limit', comment: 'Allow necessary icmpv6-types for ipv6 to work',
                    type: ['nd-neighbor-solicit', 'nd-router-advert', 'nd-neighbor-advert']}
                 - {proto: 'udp', port: 46251, counter: 'invalid_packages', action: 'drop'}
+                - {proto: 'udp'}
+                - {proto: ['udp', 'tcp']}
+                - {port: 50349}
+                - {port: [50349, 34039]}
+                - {port: [50349, 34039], dport: 40349}
+                - {port: [50349, 34039], dport: [40349, 49303]}
+                - {proto: 'tcp', port: 53948}
+                - {proto: ['tcp', 'udp'], port: [53948, 49383]}
+                - {proto: 'icmp'}
+                - {proto: ['icmp', 'icmpv6']}
+                - {proto: ['icmp', 'icmpv6'], type: 'echo-request'}
+                - {proto: ['icmp', 'icmpv6'], type: ['echo-request', 'echo-reply']}
+                - {proto: 'icmp', code: 30}
+                - {proto: 'icmp', code: [30, 8]}
+                - {proto: 'icmp', code: [30, 8], src: '192.168.0.1'}
+                - {proto: 'icmp', code: [30, 8], src: ['192.168.0.1', '192.168.1.1']}
+                - {proto: 'icmp', code: [30, 8], src: ['192.168.0.1', '192.168.1.1'], comment: 'test'}
+                - {proto: 'icmp', code: [30, 8], src: ['192.168.0.1', '192.168.1.1'], comment: 'test', log: 'test2'}
+                - {proto: ['tcp', 'udp'], port: [80, 443], comment: 'web test', dest: '192.168.0.1'}
+                - {proto: ['tcp', 'udp'], port: [80, 443], comment: 'web test2', dest: ['192.168.0.1', '192.168.0.2']}
+                - {proto: 'tcp', port: 22000, seq: 22, comment: 'test sequence 2'}
+                - {proto: 'tcp', port: 21000, seq: 21, comment: 'test sequence 1'}
+                - {proto: 'tcp', port: 23000, seq: 23, comment: 'test sequence 3'}
+                - {proto: 'tcp', port: '2000-2100', comment: 'test port range'}
+                - {if: 'test_int_priv', comment: 'input interface'}
+                - {of: 'test_int_pub', comment: 'output interface'}
+                - {of: 'test_int_pub', if: 'test_int_priv', comment: 'in- & output interface'}
+                - {proto: 'icmp', if: 'test_int_pub', limit: 'rate 10/second', comment: 'limit icmp traffic from public int'}
+                - {proto: 'icmp', if: 'test_int_pub', limit: 'icmp_limit', comment: 'limit icmp traffic from public int with pre-defined limit'}
+                - {proto: 'udp', port: 51820, counter: true, comment: 'Count wireguard packets'}
+                - {proto: 'udp', port: 51821, counter: 'invalid_packages', comment: 'Count wrong wireguard packets with pre-defined counter'}
 
             outgoing:
               hook: 'output'
@@ -60,6 +91,12 @@
                 - {proto: ['tcp', 'udp'], port: [80, 443]}
                 - {proto: ['icmp', 'icmpv6']}
 
+            dnat:
+              hook: 'prerouting'
+              policy: 'accept'
+              rules:
+                - {src: '192.168.0.3', dest: '192.168.10.20', dnat: '192.168.10.1'}
+
             translate:
               hook: 'postrouting'
               type: 'nat'
@@ -67,17 +104,6 @@
               rules:
                 - {'src': '$private_ranges', oif: 'eno2', masquerade: true}  # dynamic outbound nat
                 - {'src': '$private_ranges', oif: 'eno3', snat: '192.168.0.1'}  # static outbound nat
-
-  pre_tasks:
-    - name: Installing Role dependencies
-      apt:
-        name: ['kmod']
-        state: present
-
-    - name: Test Utils
-      apt:
-        name: ['python3-nftables', 'nano']
-        state: present
 
   roles:
     - ansibleguy.infra_nftables
