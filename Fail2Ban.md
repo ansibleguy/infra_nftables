@@ -52,7 +52,7 @@ blocktype = drop
 If you want to reload the nftables config you need to do it by restarting the service:
 
 ```bash
-systemctl restart nftables.servic
+systemctl restart nftables.service
 ```
 
 Other ways won't re-add the Fail2Ban block-rules.
