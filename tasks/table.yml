@@ -6,6 +6,7 @@
       - nft_table.type in NFT_HC.choices.table.types
   ignore_errors: true
   register: nft_config_check_table
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Informing user"
   ansible.builtin.fail:
@@ -15,6 +16,7 @@
   when:
     - nft_config_check_table.failed is defined
     - nft_config_check_table.failed
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Chains"
   ansible.builtin.include_tasks: chain.yml
@@ -27,6 +29,7 @@
     loop_var: nft_chain_item
   with_dict: "{{ nft_table.chains }}"
   no_log: true  # less verbose output
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Copying table config"
   ansible.builtin.template:
@@ -39,6 +42,7 @@
   notify: Restart-nftables
   ignore_errors: true
   register: nft_config_table
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Copying table config for debugging (/tmp/{{ nft_table_name }}.nft)"
   ansible.builtin.template:
@@ -50,6 +54,7 @@
   when:
     - nft_config_table.failed is defined
     - nft_config_table.failed
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Failing"
   ansible.builtin.fail:
@@ -57,8 +62,10 @@
   when:
     - nft_config_table.failed is defined
     - nft_config_table.failed
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Removing debugging-config"
   ansible.builtin.file:
     state: absent
     path: '/tmp/{{ nft_table_name }}.nft'
+  tags: config

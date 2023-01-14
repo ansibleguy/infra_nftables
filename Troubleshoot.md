@@ -119,4 +119,4 @@ rule_after:
 
 If many rules throw this error you might have a problem with a NAT rule.
 
-It could be your kernel does not support NFTables-NATing
+It could be your kernel does not support NFTables-NATing or you try to add NAT rules to chains that don't have the type 'nat' configured.

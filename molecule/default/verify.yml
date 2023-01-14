@@ -7,6 +7,7 @@
     - name: Pulling existing rules
       ansible.builtin.command: 'nft list ruleset'
       register: ruleset
+      changed_when: false
 
     - name: Checking rules
       ansible.builtin.assert:
@@ -55,6 +56,7 @@
         - 'meta l4proto { 6, 17 } th dport { 80, 443 } accept'
         - 'meta l4proto { 1, 58 } accept'
         # nat
+        - 'iifname "$int_private" tcp dport 8888 dnat ip to 192.168.10.1:8888'
         - 'oifname \"$int_private\" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } masquerade'
         - 'oifname \"$int_private2\" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } snat ip to 192.168.0.1'
 

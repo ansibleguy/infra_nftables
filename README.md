@@ -260,6 +260,7 @@ ansible-playbook -K -D -i inventory/hosts.yml playbook.yml
 
 There are also some useful **tags** available:
 * config
+* purge
 
 To debug errors - you can set the 'debug' variable at runtime:
 ```bash

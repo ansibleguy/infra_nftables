@@ -94,13 +94,13 @@
                 - {proto: ['tcp', 'udp'], port: [80, 443]}
                 - {proto: ['icmp', 'icmpv6']}
 
-            # seems like debian11 kernel 5.x does not support it (?)
-            # preroute:
-            #   hook: 'prerouting'
-            #   priority: -100
-            #   policy: 'accept'
-            #   rules:
-            #     - {if: '$int_private', proto: 'tcp', port: [80, 443], dnat: 'ip 192.168.10.1'}
+            preroute:
+              hook: 'prerouting'
+              type: 'nat'
+              priority: -100
+              policy: 'accept'
+              rules:
+                - {if: '$int_private', proto: 'tcp', port: 8888, dnat: 'ip 192.168.10.1:8888'}
 
             translate:
               hook: 'postrouting'

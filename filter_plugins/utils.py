@@ -141,6 +141,11 @@ class FilterModule(object):
                 translation['proto'].find(special_cases['proto']) == -1:
             translation['proto'] = f"{special_cases['proto']} {translation['proto']}"
 
+        # dnat ip-proto on inet table
+        if 'dnat to' in translation and translation['dnat to'].startswith('dnat to ip'):
+            ipp, dnat = translation.pop('dnat to').replace('dnat to ', '').split(' ', 1)
+            translation['dnat to'] = f'dnat {ipp} to {dnat}'
+
         # add ending space for log prefix
         if 'log' in translation and translation['log'].find('prefix') != -1 and \
                 translation['log'].endswith('"'):

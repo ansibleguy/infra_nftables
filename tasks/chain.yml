@@ -11,6 +11,7 @@
       nftables_unique_sequence(NFT_HC.rules.sort)
   ignore_errors: true
   register: nft_config_check_chain
+  tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Chain '{{ nft_chain_name }}' | Informing user"
   ansible.builtin.fail:
@@ -23,3 +24,4 @@
   when:
     - nft_config_check_chain.failed is defined
     - nft_config_check_chain.failed
+  tags: config

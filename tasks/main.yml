@@ -5,12 +5,14 @@
     that:
       - nftables is defined
       - nftables.tables is defined
+  tags: config
 
 - name: NFTables | Pulling info on installed packages
   ansible.builtin.package_facts:
     manager: auto
   ignore_errors: true
   register: nft_packages
+  tags: config
 
 - name: "NFTables | Failing if incompatible packages are installed ({{ NFT_HC.incompatible_packages | join(', ') }})"
   ansible.builtin.assert:
@@ -19,6 +21,7 @@
   when:
     - nft_packages.failed is undefined or not nft_packages.failed
     - "'packages' in ansible_facts and 'nftables' not in ansible_facts.packages"
+  tags: config
 
 - name: NFTables | Debian 10 Installation
   ansible.builtin.import_tasks: debian10.yml
@@ -66,6 +69,7 @@
   when:
     - nft_config_base.failed is defined
     - nft_config_base.failed
+  tags: config
 
 - name: NFTables | Failing
   ansible.builtin.fail:
@@ -79,6 +83,7 @@
   register: nft_config_files
   changed_when: false
   when: NFT_CONFIG.settings.purge
+  tags: [config, purge]
 
 - name: NFTables | Purging unmanaged config-files
   ansible.builtin.file:
@@ -88,6 +93,7 @@
     - NFT_CONFIG.settings.purge
     - item | split('.') | first not in NFT_CONFIG.tables
   loop: "{{ nft_config_files.stdout_lines }}"
+  tags: [config, purge]
 
 - name: NFTables | Tables
   ansible.builtin.include_tasks: table.yml
@@ -100,6 +106,7 @@
     loop_var: nft_table_item
   with_dict: "{{ NFT_CONFIG.tables }}"
   no_log: true  # less verbose output
+  tags: config
 
 - name: NFTables | Installing bash-completion
   ansible.builtin.apt:
