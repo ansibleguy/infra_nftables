@@ -38,20 +38,6 @@ platforms:
     groups: [grp_targets]
     <<: *docker_all
 
-  - name: test-ag-nftables-2
-    networks:
-      - name: 'test-ag-nftables'
-        ipv4_address: '192.168.9.3'
-    groups: [grp_targets]
-    <<: *docker_all
-
-  - name: test-ag-nftables-3
-    networks:
-      - name: 'test-ag-nftables'
-        ipv4_address: '192.168.9.4'
-    groups: [grp_targets]
-    <<: *docker_all
-
 provisioner:
   name: ansible
 verifier:

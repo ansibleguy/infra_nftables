@@ -101,6 +101,44 @@
   with_dict: "{{ NFT_CONFIG.tables }}"
   no_log: true  # less verbose output
 
+- name: NFTables | Installing bash-completion
+  ansible.builtin.apt:
+    name: 'bash-completion'
+    state: present
+  when: NFT_CONFIG.enable.bash_completion
+
+- name: NFTables | Adding bash-completion
+  ansible.builtin.copy:
+    src: 'files/usr/share/bash-completion/completions/nft'
+    dest: '/usr/share/bash-completion/completions/nft'
+    mode: 0644
+    owner: 'root'
+    group: 'root'
+  when: NFT_CONFIG.enable.bash_completion
+
+- name: NFTables | Enabling bash-completion (for root in bashrc)
+  ansible.builtin.blockinfile:
+    path: '/root/.bashrc'
+    block: |
+      # enable bash completion in interactive shells
+      if ! shopt -oq posix; then
+        if [ -f /usr/share/bash-completion/bash_completion ]; then
+          . /usr/share/bash-completion/bash_completion
+        elif [ -f /etc/bash_completion ]; then
+          . /etc/bash_completion
+        fi
+      fi
+    marker: "# {mark} ansibleguy.infra_nftables bash-completion"
+    state: present
+  when: NFT_CONFIG.enable.bash_completion
+
+- name: NFTables | Disabling bash-completion (for root in bashrc)
+  ansible.builtin.blockinfile:
+    path: '/root/.bashrc'
+    marker: "# {mark} ansibleguy.infra_nftables bash-completion"
+    state: absent
+  when: not NFT_CONFIG.enable.bash_completion
+
 - name: NFTables | Enabling/Starting service
   ansible.builtin.service:
     name: 'nftables'

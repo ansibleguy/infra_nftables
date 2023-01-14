@@ -1,5 +1,7 @@
 from re import sub as regex_replace
 
+NONE_VALUES = ['', ' ', None, 'none', 'None']
+
 
 class FilterModule(object):
 
@@ -39,7 +41,10 @@ class FilterModule(object):
         return regex_replace('[^0-9a-zA-Z_\-]+', '', name)
 
     @classmethod
-    def _translate_rule(cls, rule: dict, config: dict):
+    def _translate_rule(cls, rule: dict, config: dict, seq_keys: list):
+        # todo: fixes:
+        #   if only protocol => add "meta l4proto" as prefix
+        #   only dport/sport (without tcp/udp) not valid (check?)
         translation = config['defaults'].copy()
         mapping = {}
         special_cases = {
@@ -107,6 +112,18 @@ class FilterModule(object):
 
                     break
 
+        # if any provided field was ignored/not matched => throw error
+        for field in rule:
+            if field in seq_keys:
+                continue
+
+            if field not in mapping.values():
+                raise ValueError(
+                    "Rule has unexpected fields defined! "
+                    f"Fields: '{list(set(rule).difference(set(mapping.values())))}' "
+                    f"Rule: '{rule}'"
+                )
+
         # add generic logging for any dropped packets
         if config['drop_log'] and 'action' in translation and \
                 translation['action'] == 'drop' and 'log prefix' not in mapping:
@@ -129,6 +146,9 @@ class FilterModule(object):
                 translation['log'].endswith('"'):
             translation['log'] = f"{translation['log'][:-1]} \""
 
+        if 'action' in translation and translation['action'] in NONE_VALUES:
+            translation.pop('action')
+
         # concat the rule in its designated field-sequence
         translated_rule = ''
         for field_nft in config['sequence']:
@@ -138,9 +158,8 @@ class FilterModule(object):
         return translated_rule.strip()
 
     @classmethod
-    def nftables_rules_translate(cls, raw_rules: list, translate_config: dict) -> list:
+    def nftables_rules_translate(cls, raw_rules: list, translate_config: dict, sort_config: dict) -> list:
         rules = []
-        NONE_VALUES = ['', ' ', None]
 
         for rule in raw_rules:
             _translated = None
@@ -168,6 +187,7 @@ class FilterModule(object):
                     _translated = cls._translate_rule(
                         rule=rule,
                         config=translate_config,
+                        seq_keys=sort_config['fields'],
                     )
 
             if _translated in NONE_VALUES:
@@ -222,6 +242,7 @@ class FilterModule(object):
         return cls.nftables_rules_translate(
             raw_rules=rules,
             translate_config=config_hc['rules']['translate'],
+            sort_config=config_hc['rules']['sort'],
         )
 
     @classmethod
@@ -286,7 +307,7 @@ class FilterModule(object):
 
     @staticmethod
     def _format_lines(lines: list, whitespace: int) -> str:
-        return f";\n{' ' * whitespace}".join(lines)
+        return f"\n{' ' * whitespace}".join(lines)
 
     @staticmethod
     def _format_comment(comment: str) -> str:

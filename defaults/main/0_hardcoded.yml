@@ -77,6 +77,7 @@ NFT_HC:
         counter: ['count']
         'snat to': ['snat', 'src_nat', 'source_nat', 'outbound_nat']
         'dnat to': ['dnat', 'dest_nat', 'destination_nat']
+        'redirect to': ['redir', 'redirect']
         masquerade: ['masque', 'm']
         limit: ['lim']
 
@@ -99,7 +100,7 @@ NFT_HC:
         action: 'accept'
 
       incompatible:  # only one of the fields may be present
-        - ['action', 'snat to', 'dnat to', 'masquerade']
+        - ['action', 'snat to', 'dnat to', 'masquerade', 'redirect to']
 
       # add generic drop logging to any rule that drops packages
       drop_log: true

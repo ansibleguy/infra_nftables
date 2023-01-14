@@ -1,0 +1,62 @@
+# ansible_managed
+# source: https://patchwork.ozlabs.org/project/netfilter-devel/patch/1454691182-6573-1-git-send-email-giuseppelng@gmail.com/
+
+_nft()
+{
+    local cur prev
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    local families="ip ip6 arp bridge inet netdev"
+    local sets=$(nft list sets | grep -i "set" | awk '{print $2 }' | tr -d ' ')
+
+    if [ $COMP_CWORD -eq 1 ]; then
+        COMPREPLY=( $(compgen -W "add flush list" -- $cur) )
+    elif [ $COMP_CWORD -eq 2 ]; then
+        case "$prev" in
+            "add")
+                command="${prev}"
+                COMPREPLY=( $(compgen -W "element map table set" -- $cur) )
+                ;;
+            "list")
+                COMPREPLY=( $(compgen -W "chains ruleset set sets table tables" -- $cur) )
+                ;;
+            "flush")
+                COMPREPLY=( $(compgen -W "table" -- $cur) )
+                ;;
+            *)
+                ;;
+        esac
+    elif [ $COMP_CWORD -eq 3 ]; then
+        case "$prev" in
+            "table")
+                COMPREPLY=( $(compgen -W "${families}" -- $cur) )
+                ;;
+            "set"|"element"|"map")
+                local tables=$(nft list tables | awk '{print $3 }' | tr -d ' ')
+                COMPREPLY=( $(compgen -W "${tables}" -- $cur) )
+                ;;
+            *)
+                ;;
+        esac
+    elif [ $COMP_CWORD -eq 4 ]; then
+        local tables=$(nft list tables | awk '{print $3 }' | tr -d ' ')
+        if [[ "$families" =~ "$prev" ]]; then
+            local tables=$(nft list tables "${prev}" | awk '{print $3 }' | tr -d ' ')
+            COMPREPLY=( $(compgen -W "${tables}" -- $cur) )
+        fi
+
+        if [ "${COMP_WORDS[1]}" != "add" ] && [[ "$tables" =~ "$prev" ]]; then
+            COMPREPLY=( $(compgen -W "${sets}" -- $cur) )
+        fi
+
+        if [ "${COMP_WORDS[1]}" == "add" ] && [ "${COMP_WORDS[2]}" == "element" ] && [[ "$tables" =~ "$prev" ]]; then
+            COMPREPLY=( $(compgen -W "${sets}" -- $cur) )
+        fi
+    fi
+
+    return 0;
+}
+
+complete -F _nft nft

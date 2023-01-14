@@ -1,7 +1,7 @@
 ---
 
 - name: Converge
-  hosts: "test-ag-nftables-1"
+  hosts: test-ag-nftables-1
   vars:
     nftables:
       enable:
@@ -16,6 +16,9 @@
             var_test: '1.1.1.1'
             private_ranges: ['192.168.0.0/16', '172.16.0.0/12', '10.0.0.0/8']
             dns_servers: ['1.1.1.1', '1.1.0.0', '8.8.8.8', '8.8.4.4']
+            int_public: 'eno1'
+            int_private: 'eno2'
+            int_private2: 'eno3'
 
           sets:
             set_test:
@@ -44,24 +47,26 @@
                   raw: 'ct state {established, related} counter accept comment "Allow open sessions"'
                 - s: 3
                   raw: 'iifname "lo" accept comment "Allow loopback traffic"'
+                - {proto: 'tcp', port: 22000, seq: 5, comment: 'test sequence 2'}
+                - {proto: 'tcp', port: 21000, seq: 4, comment: 'test sequence 1'}
+                - {proto: 'tcp', port: 23000, seq: 6, comment: 'test sequence 3'}
                 - {proto: 'icmp', type: 'echo-request', limit: 'icmp_limit', comment: 'Allow icmp-ping'}
                 - {proto: 'icmpv6', type: 'echo-request', limit: 'icmp_limit', comment: 'Allow icmp-ping'}
                 - {proto: 'icmp', code: 30, limit: 'icmp_limit', comment: 'Allow icmp-traceroute'}
                 - {proto: 'icmpv6', limit: 'icmp_limit', comment: 'Allow necessary icmpv6-types for ipv6 to work',
                    type: ['nd-neighbor-solicit', 'nd-router-advert', 'nd-neighbor-advert']}
                 - {proto: 'udp', port: 46251, counter: 'invalid_packages', action: 'drop'}
-                - {proto: 'udp'}
+                # - {proto: 'udp'}
                 - {proto: ['udp', 'tcp']}
-                - {port: 50349}
-                - {port: [50349, 34039]}
-                - {port: [50349, 34039], dport: 40349}
-                - {port: [50349, 34039], dport: [40349, 49303]}
-                - {proto: 'tcp', port: 53948}
+                - {proto: 'tcp', port: 50349}
+                - {proto: 'tcp', port: [50349, 34039]}
+                # - {proto: 'tcp', dport: [50349, 34039], sport: 40349}
+                # - {proto: 'tcp', dport: [50349, 34039], sport: [40349, 49303]}
                 - {proto: ['tcp', 'udp'], port: [53948, 49383]}
                 - {proto: 'icmp'}
                 - {proto: ['icmp', 'icmpv6']}
-                - {proto: ['icmp', 'icmpv6'], type: 'echo-request'}
-                - {proto: ['icmp', 'icmpv6'], type: ['echo-request', 'echo-reply']}
+                - {proto: 'icmp', type: 'echo-request'}
+                - {proto: 'icmp', type: ['echo-request', 'echo-reply']}
                 - {proto: 'icmp', code: 30}
                 - {proto: 'icmp', code: [30, 8]}
                 - {proto: 'icmp', code: [30, 8], src: '192.168.0.1'}
@@ -70,17 +75,15 @@
                 - {proto: 'icmp', code: [30, 8], src: ['192.168.0.1', '192.168.1.1'], comment: 'test', log: 'test2'}
                 - {proto: ['tcp', 'udp'], port: [80, 443], comment: 'web test', dest: '192.168.0.1'}
                 - {proto: ['tcp', 'udp'], port: [80, 443], comment: 'web test2', dest: ['192.168.0.1', '192.168.0.2']}
-                - {proto: 'tcp', port: 22000, seq: 22, comment: 'test sequence 2'}
-                - {proto: 'tcp', port: 21000, seq: 21, comment: 'test sequence 1'}
-                - {proto: 'tcp', port: 23000, seq: 23, comment: 'test sequence 3'}
                 - {proto: 'tcp', port: '2000-2100', comment: 'test port range'}
-                - {if: 'test_int_priv', comment: 'input interface'}
-                - {of: 'test_int_pub', comment: 'output interface'}
-                - {of: 'test_int_pub', if: 'test_int_priv', comment: 'in- & output interface'}
-                - {proto: 'icmp', if: 'test_int_pub', limit: 'rate 10/second', comment: 'limit icmp traffic from public int'}
-                - {proto: 'icmp', if: 'test_int_pub', limit: 'icmp_limit', comment: 'limit icmp traffic from public int with pre-defined limit'}
-                - {proto: 'udp', port: 51820, counter: true, comment: 'Count wireguard packets'}
-                - {proto: 'udp', port: 51821, counter: 'invalid_packages', comment: 'Count wrong wireguard packets with pre-defined counter'}
+                - {if: '$int_private', comment: 'input interface'}
+                - {of: '$int_private', comment: 'output interface'}
+                - {of: '$int_public', if: '$int_private', comment: 'in- & output interface'}
+                - {proto: 'icmp', if: '$int_public', limit: 'rate 10/second', comment: 'limit icmp traffic from public int'}
+                - {proto: 'icmp', type: 'echo-request', if: '$int_public', limit: 'rate over 10/second', comment: 'drop ping floods', action: 'drop'}
+                - {proto: 'icmp', if: '$int_public', limit: 'icmp_limit', comment: 'limit icmp traffic from public int with pre-defined limit'}
+                - {proto: 'udp', port: 51820, counter: true, comment: 'Count wireguard packets', action: none}
+                - {proto: 'udp', port: 51821, counter: 'invalid_packages', comment: 'Count wrong wireguard packets with pre-defined counter', action: none}
 
             outgoing:
               hook: 'output'
@@ -91,19 +94,22 @@
                 - {proto: ['tcp', 'udp'], port: [80, 443]}
                 - {proto: ['icmp', 'icmpv6']}
 
-            dnat:
-              hook: 'prerouting'
-              policy: 'accept'
-              rules:
-                - {src: '192.168.0.3', dest: '192.168.10.20', dnat: '192.168.10.1'}
+            # seems like debian11 kernel 5.x does not support it (?)
+            # preroute:
+            #   hook: 'prerouting'
+            #   priority: -100
+            #   policy: 'accept'
+            #   rules:
+            #     - {if: '$int_private', proto: 'tcp', port: [80, 443], dnat: 'ip 192.168.10.1'}
 
             translate:
               hook: 'postrouting'
               type: 'nat'
+              priority: -100
               policy: 'accept'
               rules:
-                - {'src': '$private_ranges', oif: 'eno2', masquerade: true}  # dynamic outbound nat
-                - {'src': '$private_ranges', oif: 'eno3', snat: '192.168.0.1'}  # static outbound nat
+                - {'src': '$private_ranges', oif: '$int_private', masquerade: true}  # dynamic outbound nat
+                - {'src': '$private_ranges', oif: '$int_private2', snat: '192.168.0.1'}  # static outbound nat
 
   roles:
     - ansibleguy.infra_nftables

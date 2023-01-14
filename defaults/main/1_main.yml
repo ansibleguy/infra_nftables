@@ -8,6 +8,7 @@ defaults_nftables:
     sets: true
     nat: true
     deb11_backport: false
+    bash_completion: true
 
   _defaults:
     table: {}

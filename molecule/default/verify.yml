@@ -1,7 +1,7 @@
 ---
 
 - name: Verify
-  hosts: grp_tester
+  hosts: test-ag-nftables-1
   gather_facts: false
   tasks:
     - name: Pulling existing rules
@@ -11,4 +11,85 @@
     - name: Checking rules
       ansible.builtin.assert:
         that:
-          -
+          - "'\t\t{{ item }}' in ruleset.stdout_lines"
+      loop:
+        # input
+        - 'ct state invalid counter name \"invalid_packages\" log prefix \"DROP invalid sates\" drop'  # seq 1
+        - 'ct state { established, related } counter packets 0 bytes 0 accept comment \"Allow open sessions\"'  # seq 2
+        - 'iifname \"lo\" accept comment \"Allow loopback traffic\"'  # seq 3
+        - 'tcp dport 21000 accept comment \"test sequence 1\"'  # seq 4
+        - 'tcp dport 22000 accept comment \"test sequence 2\"'  # seq 5
+        - 'tcp dport 23000 accept comment \"test sequence 3\"'  # seq 6
+        - 'icmp type echo-request limit name \"icmp_limit\" accept comment \"Allow icmp-ping\"'
+        - 'icmpv6 type echo-request limit name \"icmp_limit\" accept comment \"Allow icmp-ping\"'
+        - 'icmp code 30 limit name \"icmp_limit\" accept comment \"Allow icmp-traceroute\"'
+        - 'icmpv6 type { nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } limit name \"icmp_limit\" accept comment \"Allow necessary icmpv6-types for ipv6 to work\"'
+        - 'udp dport 46251 log prefix \"DROP\" counter name \"invalid_packages\" drop'
+        - 'meta l4proto { 6, 17 } accept'
+        - 'tcp dport 50349 accept'
+        - 'tcp dport { 34039, 50349 } accept'
+        - 'meta l4proto { 6, 17 } th dport { 49383, 53948 } accept'
+        - 'meta l4proto 1 accept'  # why not just 'icmp' ?
+        - 'meta l4proto { 1, 58 } accept'
+        - 'icmp type echo-request accept'
+        - 'icmp type { echo-reply, echo-request } accept'
+        - 'icmp code 30 accept'
+        - 'icmp code { 8, 30 } accept'
+        - 'icmp code { 8, 30 } ip saddr 192.168.0.1 accept'
+        - 'icmp code { 8, 30 } ip saddr { 192.168.0.1, 192.168.1.1 } accept'
+        - 'icmp code { 8, 30 } ip saddr { 192.168.0.1, 192.168.1.1 } accept comment \"test\"'
+        - 'icmp code { 8, 30 } ip saddr { 192.168.0.1, 192.168.1.1 } log prefix \"test2\" accept comment \"test\"'
+        - 'meta l4proto { 6, 17 } th dport { 80, 443 } ip daddr 192.168.0.1 accept comment \"web test\"'
+        - 'meta l4proto { 6, 17 } th dport { 80, 443 } ip daddr { 192.168.0.1, 192.168.0.2 } accept comment \"web test2\"'
+        - 'tcp dport 2000-2100 accept comment \"test port range\"'
+        - 'iifname \"$int_private\" accept comment \"input interface\"'
+        - 'oifname \"$int_private\" accept comment \"output interface\"'
+        - 'iifname \"$int_private\" oifname \"$int_public\" accept comment \"in- & output interface\"'
+        - 'iifname \"$int_public\" meta l4proto 1 limit rate 10/second accept comment \"limit icmp traffic from public int\"'
+        - 'iifname \"$int_public\" meta l4proto 1 limit name \"icmp_limit\" accept comment \"limit icmp traffic from public int with pre-defined limit\"'
+        - 'udp dport 51820 counter packets 0 bytes 0 comment \"Count wireguard packets\"'
+        - 'udp dport 51821 counter name \"invalid_packages\" comment \"Count wrong wireguard packets with pre-defined counter\"'
+        # output
+        - 'udp dport 53 ip daddr { 1.1.0.0, 1.1.1.1, 8.8.4.4, 8.8.8.8 } accept'
+        - 'tcp dport { 53, 853 } ip daddr { 1.1.0.0, 1.1.1.1, 8.8.4.4, 8.8.8.8 } accept'
+        - 'meta l4proto { 6, 17 } th dport { 80, 443 } accept'
+        - 'meta l4proto { 1, 58 } accept'
+        # nat
+        - 'oifname \"$int_private\" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } masquerade'
+        - 'oifname \"$int_private2\" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } snat ip to 192.168.0.1'
+
+      ignore_errors: true
+      register: rule_check
+
+    - name: Show existing rules if validation failed
+      debug:
+        var: ruleset.stdout_lines
+      when:
+        - rule_check.failed is defined
+        - rule_check.failed
+
+    - name: Fail if validation failed
+      ansible.builtin.fail:
+        msg: 'Rule Validation Failed!'
+      when:
+        - rule_check.failed is defined
+        - rule_check.failed
+
+    - name: Getting start of 'incoming' chain
+      ansible.builtin.set_fact:
+        chain_incoming_line: "{{ lookup('ansible.utils.index_of',
+        data=ruleset.stdout_lines, test='eq',
+        value='\t\ttype filter hook input priority filter; policy drop;') }}"
+
+    - name: Checking rule sequence/sorting of 'incoming' chain
+      ansible.builtin.assert:
+        that: >
+          lookup('ansible.utils.index_of', data=ruleset.stdout_lines, test='eq',
+          value='\t\t{{ item.r }}') | int == (chain_incoming_line | int + item.s)
+      loop:
+        - {r: 'ct state invalid counter name \"invalid_packages\" log prefix \"DROP invalid sates\" drop', s: 1}
+        - {r: 'ct state { established, related } counter packets 0 bytes 0 accept comment \"Allow open sessions\"', s: 2}
+        - {r: 'iifname \"lo\" accept comment \"Allow loopback traffic\"', s: 3}
+        - {r: 'tcp dport 21000 accept comment \"test sequence 1\"', s: 4}
+        - {r: 'tcp dport 22000 accept comment \"test sequence 2\"', s: 5}
+        - {r: 'tcp dport 23000 accept comment \"test sequence 3\"', s: 6}

@@ -64,12 +64,13 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
       * set-type = ipv4_addr
       * add counter = yes
     * rules
-      * policy = accept
+      * policy = accept (_set it to 'none' if you want to explicitly remove it_)
       * logging drops = yes
 
 
   * **Default opt-ins**:
     * Purging of unmanaged config-files stored in '/etc/nftables.d/'
+    * Adding [bash-completion script](https://patchwork.ozlabs.org/project/netfilter-devel/patch/1454691182-6573-1-git-send-email-giuseppelng@gmail.com/) for the 'nft' command
 
   * **Default opt-outs**:
     * Installing NFTables from Debian 11 backports when running on Debian 10 (_newer version_)
@@ -84,6 +85,11 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 * **Warning:** Not every setting/variable you provide will be checked for validity. Bad config might break the role!
 
 
+* **Warning:** Some **core functionalities** (_NAT/Sets_) might **not be supported by mainstream Distribution kernels**.
+
+  See: [Troubleshooting Guide - 'Unsupported Operation'](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md#unsupported-operation)
+
+
 * **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure **hooks and priorities**!
 
 
@@ -93,7 +99,7 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 
   | Function                    | Keys                                               | Note                                                                                                                                                                                                               |
   |----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
-  | Rule sequence                           | s, id, seq, sequence                                   | The sequence-id (_integer_) to sort the rules inside a chain. If none is provided one will be auto-generated beginning at 1000. If a duplicate sequence id is provided the role will fail its config-check!        |
+  | Rule sequence               | s, id, seq, sequence                                   | The sequence-id (_integer_) to sort the rules inside a chain. If none is provided one will be auto-generated beginning at 1000. If a duplicate sequence id is provided the role will fail its config-check!        |
   | Input interface             | if, iif, iifname                                   | -                                                                                                                                                                                                                  |
   | Output interface            | of, oif, oifname                                   | -                                                                                                                                                                                                                  |
   | Protocol                    | proto, pr, protocol                                | -                                                                                                                                                                                                                  |
@@ -110,6 +116,7 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
   | Source NAT masquerading     | m, masque, masquerade                              | If NAT masquerading should be used                                                                                                                                                                                 |
   | Source NAT                  | snat, src_nat, source_nat, outbound_nat, 'snat to' | -                                                                                                                                                                                                                  |
   | Destination NAT             | dnat, dest_nat, destination_nat, 'dnat to'         | -                                                                                                                                                                                                                  |
+  | Redirect                    | redir, redirect, 'redirect to'                     | By using redirect, packets will be forwarded to local machine                                                                                                                                                      |                                                                                                                                                                                                                  |
   | Rule comment                | c, cmt, comment                                    | -                                                                                                                                                                                                                  |
 
   Only one of Action, Source-NAT, Masquerading or Destination-NAT can be set for one rule!
@@ -146,6 +153,12 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
       comment: text  # optional
     ```
 
+* **Warning:** If you want to add a 'count-only' rule you need to set 'action' explicitly to 'none' - else the default value 'accept' will be added!
+
+
+* **Info:** If any unsupported field is supplied to the rule-translation it will throw an error as this might lead to unexpected results!
+
+
 ## Troubleshoot
 
 * [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md)
@@ -161,7 +174,8 @@ nftables:
   # enable:  # features must be supported by kernel
   #   sets: true
   #   nat: true
-  #   deb11_backport: false
+  #   deb11_backport: false  # use debian11 backports repository to install newer version on debian 10
+  #   bash_completion: true
 
   _defaults:  # defaults inherited by all tables and chains
     table:

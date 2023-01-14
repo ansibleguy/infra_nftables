@@ -3,7 +3,20 @@
 - name: Prepare
   hosts: all
   tasks:
+    - name: Installing troubleshooting utils
+      apt:
+        name: ['less', 'nano', 'net-tools', 'dnsutils', 'iproute2']
+        state: present
+
     - name: Installing Role dependencies
       apt:
         name: ['kmod']
+        state: present
+
+- name: Prepare tester
+  hosts: test-ag-nftables-tester
+  tasks:
+    - name: Installing testing utils
+      apt:
+        name: ['nmap']
         state: present

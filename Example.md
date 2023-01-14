@@ -107,7 +107,7 @@ guy@ansible:~# nft list ruleset
 >                 udp dport 53 ip daddr { 1.1.0.0, 1.1.1.1, 8.8.4.4, 8.8.8.8 } accept
 >                 tcp dport { 53, 853 } ip daddr { 1.1.0.0, 1.1.1.1, 8.8.4.4, 8.8.8.8 } accept
 >                 meta l4proto { 6, 17 } th dport { 80, 443 } accept
->                 meta l4proto { 1, 58 } accept
+>                 meta l4proto { 1, 58 } accept comment "Allow outbound icmp"
 >                 counter packets 0 bytes 0 comment "COUNT example-outgoing-drop"
 >         }
 > 

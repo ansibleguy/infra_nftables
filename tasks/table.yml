@@ -43,7 +43,7 @@
 - name: "NFTables | Table '{{ nft_table_name }}' | Copying table config for debugging (/tmp/{{ nft_table_name }}.nft)"
   ansible.builtin.template:
     src: "templates{{ NFT_HC.path.config_dir }}/table.nft.j2"
-    dest: '/tmp/{{ nft_table_name }}.nft'
+    dest: '/tmp/nftables_{{ nft_table_name }}.nft'
     mode: 0640
     owner: 'root'
     group: 'root'
