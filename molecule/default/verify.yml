@@ -24,7 +24,8 @@
         - 'icmp type echo-request limit name \"icmp_limit\" accept comment \"Allow icmp-ping\"'
         - 'icmpv6 type echo-request limit name \"icmp_limit\" accept comment \"Allow icmp-ping\"'
         - 'icmp code 30 limit name \"icmp_limit\" accept comment \"Allow icmp-traceroute\"'
-        - 'icmpv6 type { nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } limit name \"icmp_limit\" accept comment \"Allow necessary icmpv6-types for ipv6 to work\"'
+        - 'icmpv6 type { nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } \
+        limit name \"icmp_limit\" accept comment \"Allow necessary icmpv6-types for ipv6 to work\"'
         - 'udp dport 46251 log prefix \"DROP\" counter name \"invalid_packages\" drop'
         - 'meta l4proto { 6, 17 } accept'
         - 'tcp dport 50349 accept'
