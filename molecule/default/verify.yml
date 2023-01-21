@@ -65,7 +65,7 @@
       register: rule_check
 
     - name: Show existing rules if validation failed
-      debug:
+      ansible.builtin.debug:
         var: ruleset.stdout_lines
       when:
         - rule_check.failed is defined

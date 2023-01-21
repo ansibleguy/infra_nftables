@@ -4,12 +4,12 @@
   hosts: all
   tasks:
     - name: Installing troubleshooting utils
-      apt:
+      ansible.builtin.apt:
         name: ['less', 'nano', 'net-tools', 'dnsutils', 'iproute2']
         state: present
 
     - name: Installing Role dependencies
-      apt:
+      ansible.builtin.apt:
         name: ['kmod']
         state: present
 
@@ -17,6 +17,6 @@
   hosts: test-ag-nftables-tester
   tasks:
     - name: Installing testing utils
-      apt:
+      ansible.builtin.apt:
         name: ['nmap']
         state: present

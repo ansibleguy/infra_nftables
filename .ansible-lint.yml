@@ -10,3 +10,4 @@ skip_list:
   - 'yaml'
   - '204'  # line length => checked by yamllint
   - 'name[template]'
+  - 'no-tabs'  # molecule-verify
