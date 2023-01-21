@@ -6,4 +6,4 @@
   become: true
   gather_facts: yes
   roles:
-  - ansibleguy.infra_nftables
+    - ansibleguy.infra_nftables
