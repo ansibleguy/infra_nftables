@@ -27,8 +27,7 @@ class FilterModule(object):
         if isinstance(data, list):
             return data
 
-        else:
-            return [data]
+        return [data]
 
     @classmethod
     def extend_list(cls, l1: list, l2: list) -> list:
@@ -38,10 +37,11 @@ class FilterModule(object):
 
     @staticmethod
     def nftables_safe_name(name: str) -> str:
-        return regex_replace('[^0-9a-zA-Z_\-]+', '', name)
+        return regex_replace(r'[^0-9a-zA-Z_\-]+', '', name)
 
     @classmethod
     def _translate_rule(cls, rule: dict, config: dict, seq_keys: list):
+        # pylint: disable=R0914,R1702,R0912,R0915
         # todo: fixes:
         #   if only protocol => add "meta l4proto" as prefix
         #   only dport/sport (without tcp/udp) not valid (check?)
@@ -176,7 +176,7 @@ class FilterModule(object):
                     f"Rule: {rule}'"
                 )
 
-            elif isinstance(rule, str):
+            if isinstance(rule, str):
                 _translated = rule
 
             else:
