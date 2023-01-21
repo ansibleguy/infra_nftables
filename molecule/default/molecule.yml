@@ -1,5 +1,7 @@
 ---
 
+# NOTE: the containers DNS-resolution won't work after installing NFTables: https://github.com/nestybox/sysbox/issues/456#issuecomment-1015935133
+
 _references:
   docker:
     all: &docker_all
@@ -49,6 +51,7 @@ scenario:
     - destroy
     - syntax
     - create
+    - prepare
     - converge
     - verify  # MUST NOT make changes
     - idempotence
