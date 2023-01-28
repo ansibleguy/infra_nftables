@@ -107,6 +107,9 @@
   with_dict: "{{ NFT_CONFIG.tables }}"
   no_log: true  # less verbose output
   tags: config
+  args:
+    apply:
+      tags: config
 
 - name: NFTables | Installing bash-completion
   ansible.builtin.apt:

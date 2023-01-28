@@ -30,6 +30,9 @@
   with_dict: "{{ nft_table.chains }}"
   no_log: true  # less verbose output
   tags: config
+  args:
+    apply:
+      tags: config
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Copying table config"
   ansible.builtin.template:
