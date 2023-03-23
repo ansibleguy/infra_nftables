@@ -2,20 +2,6 @@
 
 # NOTE: the containers DNS-resolution won't work after installing NFTables: https://github.com/nestybox/sysbox/issues/456#issuecomment-1015935133
 
-_references:
-  docker:
-    all: &docker_all
-      docker_host: 'tcp://molecule-docker.local:2375'
-      # docker_host: 'unix://var/run/docker.sock'  # localhost
-      purge_networks: true
-      image: 'debian:11-slim'
-      # for docker systemd config see: https://serverfault.com/questions/1053187/systemd-fails-to-run-in-a-docker-container-when-using-cgroupv2-cgroupns-priva
-      dockerfile: 'Dockerfile_debian11_systemd.j2'
-      build_image: yes
-      tmpfs: ['/tmp', '/run', '/run/lock']
-      privileged: true
-      command: '/sbin/init'
-
 dependency:
   name: galaxy
 driver:
@@ -31,14 +17,32 @@ platforms:
       - name: 'test-ag-nftables'
         ipv4_address: '192.168.9.1'
     groups: [grp_targets]
-    <<: *docker_all
+
+    # docker config
+    docker_host: 'tcp://molecule-docker.local:2375'
+    purge_networks: true
+    image: 'debian:11-slim'
+    dockerfile: 'Dockerfile_debian11_systemd.j2'
+    build_image: yes
+    tmpfs: [ '/tmp', '/run', '/run/lock' ]
+    privileged: true
+    command: '/sbin/init'
 
   - name: test-ag-nftables-1
     networks:
       - name: 'test-ag-nftables'
         ipv4_address: '192.168.9.2'
     groups: [grp_targets]
-    <<: *docker_all
+
+    # docker config
+    docker_host: 'tcp://molecule-docker.local:2375'
+    purge_networks: true
+    image: 'debian:11-slim'
+    dockerfile: 'Dockerfile_debian11_systemd.j2'
+    build_image: yes
+    tmpfs: [ '/tmp', '/run', '/run/lock' ]
+    privileged: true
+    command: '/sbin/init'
 
 provisioner:
   name: ansible
