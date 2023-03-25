@@ -24,7 +24,7 @@ platforms:
     image: 'debian:11-slim'
     dockerfile: 'Dockerfile_debian11_systemd.j2'
     build_image: yes
-    tmpfs: [ '/tmp', '/run', '/run/lock' ]
+    tmpfs: ['/tmp', '/run', '/run/lock']
     privileged: true
     command: '/sbin/init'
 
@@ -40,7 +40,7 @@ platforms:
     image: 'debian:11-slim'
     dockerfile: 'Dockerfile_debian11_systemd.j2'
     build_image: yes
-    tmpfs: [ '/tmp', '/run', '/run/lock' ]
+    tmpfs: ['/tmp', '/run', '/run/lock']
     privileged: true
     command: '/sbin/init'
 
