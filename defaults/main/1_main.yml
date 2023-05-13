@@ -24,8 +24,6 @@ defaults_nftables:
   settings:
     purge: true  # purge all unmanaged files from /etc/nftables.d/
 
-NFT_CONFIG: "{{ defaults_nftables | combine(nftables, recursive=true) }}"
-
 defaults_table:
   type: 'inet'  # inet, ip6, ip4, arp, bridge, netdev
   chains: {}

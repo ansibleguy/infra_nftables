@@ -1,0 +1,3 @@
+---
+
+NFT_CONFIG: "{{ defaults_nftables | combine(nftables, recursive=true) }}"
