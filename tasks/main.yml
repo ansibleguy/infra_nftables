@@ -5,6 +5,8 @@
     that:
       - nftables is defined
       - nftables.tables is defined
+      - NFT_CONFIG.tables | length > 0
+      - NFT_CONFIG.tables[NFT_CONFIG.tables | list | first]['chains'] | default([]) | length > 0
   tags: config
 
 - name: NFTables | Pulling info on installed packages
@@ -23,6 +25,10 @@
     - "'packages' in ansible_facts and 'nftables' not in ansible_facts.packages"
   tags: config
 
+- name: NFTables | Checking system
+  ansible.builtin.import_tasks: check_debian.yml
+  when: ansible_os_family | lower == 'debian'
+
 - name: NFTables | Debian 10 Installation
   ansible.builtin.import_tasks: debian10.yml
   when:
@@ -34,10 +40,6 @@
   ansible.builtin.package:
     name: ['nftables']
     state: present
-
-- name: NFTables | Checking system
-  ansible.builtin.import_tasks: check_debian.yml
-  when: ansible_os_family | lower == 'debian'
 
 - name: NFTables | Adding config directory
   ansible.builtin.file:

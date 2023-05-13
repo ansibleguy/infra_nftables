@@ -163,6 +163,18 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 * **Info:** If any unsupported field is supplied to the rule-translation it will throw an error as this might lead to unexpected results!
 
 
+* **Info:** Docker might need IPTables as Package-Dependency. 
+
+  In that case you:
+
+  * Need to remove it from the 'nftables.incompatible_packages' list
+  * Need to modify the 'docker.service' (_using an override_) or '/etc/docker/daemon.json' to:
+    * Disable iptables usage (_iptables=false_) => see: [docs](https://docs.docker.com/network/iptables/#prevent-docker-from-manipulating-iptables)
+    * AND/OR add a 'ExecStartPost=/bin/systemctl reload nftables.service' in the service-file
+    * If your docker setup has no need for a bridged-network - you might also want to disable that functionality (_bridge=none_)
+
+  
+
 ## Troubleshoot
 
 * [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md)
