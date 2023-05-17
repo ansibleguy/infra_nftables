@@ -5,7 +5,7 @@
     that: >
       nft_chain.type in NFT_HC.choices.chain.types and
       nft_chain.hook in NFT_HC.choices.hook[nft_table.type][nft_chain.type] and
-      nft_chain.priority in NFT_HC.choices.priorities and
+      nft_chain.priority | string in NFT_HC.choices.priorities and
       nft_chain.rules |
       nftables_merge_rules(NFT_CONFIG, nft_table, nft_chain_name) |
       nftables_unique_sequence(NFT_HC.rules.sort)

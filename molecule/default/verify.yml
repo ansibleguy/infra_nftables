@@ -15,7 +15,7 @@
           - "'\t\t{{ item }}' in ruleset.stdout_lines"
       loop:
         # input
-        - 'ct state invalid counter name \"invalid_packages\" log prefix \"DROP invalid sates\" drop'  # seq 1
+        - 'ct state invalid counter name \"invalid_packages\" log prefix \"DROP invalid states\" drop'  # seq 1
         - 'ct state { established, related } counter packets 0 bytes 0 accept comment \"Allow open sessions\"'  # seq 2
         - 'iifname \"lo\" accept comment \"Allow loopback traffic\"'  # seq 3
         - 'tcp dport 21000 accept comment \"test sequence 1\"'  # seq 4
@@ -90,7 +90,7 @@
           lookup('ansible.utils.index_of', data=ruleset.stdout_lines, test='eq',
           value='\t\t{{ item.r }}') | int == (chain_incoming_line | int + item.s)
       loop:
-        - {r: 'ct state invalid counter name \"invalid_packages\" log prefix \"DROP invalid sates\" drop', s: 1}
+        - {r: 'ct state invalid counter name \"invalid_packages\" log prefix \"DROP invalid states\" drop', s: 1}
         - {r: 'ct state { established, related } counter packets 0 bytes 0 accept comment \"Allow open sessions\"', s: 2}
         - {r: 'iifname \"lo\" accept comment \"Allow loopback traffic\"', s: 3}
         - {r: 'tcp dport 21000 accept comment \"test sequence 1\"', s: 4}

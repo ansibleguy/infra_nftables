@@ -33,7 +33,7 @@ nftables:
 
           rules:
             - sequence: 1
-              raw: 'ct state invalid counter name invalid_packages log prefix "DROP invalid sates" drop'
+              raw: 'ct state invalid counter name invalid_packages log prefix "DROP invalid states" drop'
             - seq: 2
               raw: 'ct state {established, related} counter accept comment "Allow open sessions"'
             - s: 3
@@ -90,7 +90,7 @@ guy@ansible:~# nft list ruleset
 > 
 >         chain incoming {
 >                 type filter hook input priority filter; policy drop;
->                 ct state invalid counter name "invalid_packages" log prefix "DROP invalid sates" drop
+>                 ct state invalid counter name "invalid_packages" log prefix "DROP invalid states" drop
 >                 ct state { established, related } counter packets 0 bytes 0 accept comment "Allow open sessions"
 >                 iifname "lo" accept comment "Allow loopback traffic"
 >                 icmp type echo-request limit name "icmp_limit" accept comment "Allow icmp-ping"
@@ -174,7 +174,7 @@ guy@ansible:~# cat /etc/nftables.d/example.nft
 > 
 > 
 >     # rules
->     ct state invalid counter name invalid_packages log prefix "DROP invalid sates" drop
+>     ct state invalid counter name invalid_packages log prefix "DROP invalid states" drop
 >     ct state {established, related} counter accept comment "Allow open sessions"
 >     iifname "lo" accept comment "Allow loopback traffic"
 >     icmp type echo-request limit name icmp_limit accept comment "Allow icmp-ping"

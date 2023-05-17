@@ -38,7 +38,8 @@ NFT_HC:
         nat: []
         route: []
 
-    priorities: [-400, -300, -225, -200, -150, -100, 0, 50, 100, 225, 300]
+    # todo: unclear to me if those are the only valid priorities or one can use any (?)
+    priorities: ['-400', '-300', '-225', '-200', '-150', '-100', '0', '50', '100', '225', '300']
 
     set:
       types: [

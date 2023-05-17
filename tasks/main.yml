@@ -1,5 +1,8 @@
 ---
 
+# todo: solution for 'ct state new => log' rules as they are commonly used
+# todo: solution for anti-lockout => rollback opt-in or config-validation (?)
+
 - name: NFTables | Checking config
   ansible.builtin.assert:
     that:

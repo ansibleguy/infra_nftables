@@ -234,7 +234,7 @@ nftables:
           hook: 'input'
           rules:
             - sequence: 1
-              raw: 'ct state invalid counter name invalid_packages log prefix "DROP invalid sates" drop'
+              raw: 'ct state invalid counter name invalid_packages log prefix "DROP invalid states" drop'
             - seq: 2
               raw: 'ct state {established, related} counter accept comment "Allow open sessions"'
             - s: 3

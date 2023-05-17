@@ -47,7 +47,7 @@
   register: nft_config_table
   tags: config
 
-- name: "NFTables | Table '{{ nft_table_name }}' | Copying table config for debugging (/tmp/{{ nft_table_name }}.nft)"
+- name: "NFTables | Table '{{ nft_table_name }}' | Copying table config for debugging (/tmp/nftables_{{ nft_table_name }}.nft)"
   ansible.builtin.template:
     src: "templates{{ NFT_HC.path.config_dir }}/table.nft.j2"
     dest: '/tmp/nftables_{{ nft_table_name }}.nft'
@@ -70,5 +70,5 @@
 - name: "NFTables | Table '{{ nft_table_name }}' | Removing debugging-config"
   ansible.builtin.file:
     state: absent
-    path: '/tmp/{{ nft_table_name }}.nft'
+    path: '/tmp/nftables_{{ nft_table_name }}.nft'
   tags: config
