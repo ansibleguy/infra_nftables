@@ -37,6 +37,9 @@ class FilterModule(object):
 
     @staticmethod
     def nftables_safe_name(name: str) -> str:
+        if not isinstance(name, str):
+            return ''
+
         return regex_replace(r'[^0-9a-zA-Z_\-]+', '', name)
 
     @classmethod
