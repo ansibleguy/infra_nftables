@@ -42,7 +42,7 @@
     owner: 'root'
     group: 'root'
     validate: 'nft -cf %s'
-  notify: Restart-nftables
+  notify: Reload-nftables
   ignore_errors: true
   register: nft_config_table
   tags: config

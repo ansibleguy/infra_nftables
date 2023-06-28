@@ -60,7 +60,7 @@
     owner: 'root'
     group: 'root'
     validate: 'nft -cf %s'
-  notify: Restart-nftables
+  notify: Reload-nftables
   register: nft_config_base
   ignore_errors: true
 

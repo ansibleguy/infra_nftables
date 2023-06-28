@@ -62,3 +62,4 @@ nft -f /etc/nftables.conf
 systemctl reload nftables.service
 ```
 
+Note: You COULD try to use [PropagatesReloadTo](https://www.freedesktop.org/software/systemd/man/systemd.unit.html#PropagatesReloadTo=) to allow the use of 'reload'.
