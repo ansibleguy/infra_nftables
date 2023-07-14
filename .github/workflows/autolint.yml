@@ -4,9 +4,9 @@ name: AutoLint
 
 on:
   push:
-    branches: [main, stable]
+    branches: [main, stable, latest]
   pull_request:
-    branches: [main, stable]
+    branches: [main, stable, latest]
 
 jobs:
   build:
