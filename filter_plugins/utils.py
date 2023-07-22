@@ -4,7 +4,6 @@ NONE_VALUES = ['', ' ', None, 'none', 'None']
 
 
 class FilterModule(object):
-
     def filters(self):
         return {
             "nftables_rules_translate": self.nftables_rules_translate,
@@ -43,7 +42,9 @@ class FilterModule(object):
         return regex_replace(r'[^0-9a-zA-Z_\-]+', '', name)
 
     @classmethod
-    def _translate_rule(cls, rule: dict, config: dict, seq_keys: list):
+    def _translate_rule(
+            cls, rule: dict, config: dict, seq_keys: list, log_group: (str, int)
+    ):
         # pylint: disable=R0914,R1702,R0912,R0915
         # todo: fixes:
         #   if only protocol => add "meta l4proto" as prefix
@@ -138,6 +139,9 @@ class FilterModule(object):
 
             translation['log prefix'] = f"log prefix {_comment}"
 
+            if log_group not in NONE_VALUES and str(log_group).isnumeric():
+                translation['log prefix'] = f"{translation['log prefix']} group {log_group}"
+
         # special cases
         if 'type' not in translation and 'code' not in translation and 'proto' in translation \
                 and translation['proto'].find('icmp') != -1 and \
@@ -166,7 +170,10 @@ class FilterModule(object):
         return translated_rule.strip()
 
     @classmethod
-    def nftables_rules_translate(cls, raw_rules: list, translate_config: dict, sort_config: dict) -> list:
+    def nftables_rules_translate(
+            cls, raw_rules: list, translate_config: dict, sort_config: dict,
+            log_group: (str, int),
+    ) -> list:
         rules = []
 
         for rule in raw_rules:
@@ -196,6 +203,7 @@ class FilterModule(object):
                         rule=rule,
                         config=translate_config,
                         seq_keys=sort_config['fields'],
+                        log_group=log_group,
                     )
 
             if _translated in NONE_VALUES:
@@ -251,6 +259,7 @@ class FilterModule(object):
             raw_rules=rules,
             translate_config=config_hc['rules']['translate'],
             sort_config=config_hc['rules']['sort'],
+            log_group=config['log_group'],
         )
 
     @classmethod

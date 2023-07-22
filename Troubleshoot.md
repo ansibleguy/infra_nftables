@@ -120,3 +120,22 @@ rule_after:
 If many rules throw this error you might have a problem with a NAT rule.
 
 It could be your kernel does not support NFTables-NATing or you try to add NAT rules to chains that don't have the type 'nat' configured.
+
+### No Logs in container
+
+This is because the logs are sent via kernel.
+
+As the container has no own kernel this will lead to the logs showing up in the 'parent' server's syslog.
+
+To work around this issue you can:
+
+1. Create a local logger daemon
+
+  ```bash
+  apt install ulogd2
+  ```
+
+2. Let NFTables send logs to `group 0`
+
+  Set the `nftables.log_group: 0`
+  Add a `group 0` after every `log prefix` in rules of type `raw`
