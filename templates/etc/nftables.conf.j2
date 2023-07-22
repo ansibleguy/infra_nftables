@@ -13,3 +13,9 @@ flush ruleset
 {% endif %}
 
 include "{{ NFT_HC.path.config_dir }}/*.nft"
+
+{% if nftables_addons is defined %}
+# BEGIN ANSIBLE MANAGED BLOCK ansibleguy.addons_nftables
+include "/etc/nftables.d/addons/*.nft"
+# END ANSIBLE MANAGED BLOCK ansibleguy.addons_nftables
+{% endif %}
