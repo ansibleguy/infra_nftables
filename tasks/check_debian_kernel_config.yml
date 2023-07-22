@@ -11,7 +11,8 @@
   when: >
     ansible_virtualization_role is undefined or
     ansible_virtualization_role != 'guest' or
-    'docker' not in ansible_virtualization_tech_guest
+    ('docker' not in ansible_virtualization_tech_guest and
+    'lxc' not in ansible_virtualization_tech_guest)
 
 - name: NFTables | Check | Checking kernel config
   ansible.builtin.assert:

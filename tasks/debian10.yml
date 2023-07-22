@@ -8,7 +8,7 @@
     filename: 'buster-backports'
 
 - name: NFTables | Debian 10 | Installing
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: ['nftables']
     state: present
     default_release: 'buster-backports'

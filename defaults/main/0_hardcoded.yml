@@ -38,9 +38,6 @@ NFT_HC:
         nat: []
         route: []
 
-    # todo: unclear to me if those are the only valid priorities or one can use any (?)
-    priorities: ['-400', '-300', '-225', '-200', '-150', '-100', '0', '50', '100', '225', '300']
-
     set:
       types: [
         'ipv4_addr', 'ipv6_addr', 'ether_addr', 'inet_proto', 'inet_service',
@@ -57,8 +54,8 @@ NFT_HC:
     translate:
       # sequence of fields needed in nft config
       sequence: [
-        'iifname', 'oifname', 'proto', 'type', 'code', 'dport', 'ip daddr', 'sport',
-        'ip saddr', 'log prefix', 'counter', 'limit',
+        'iifname', 'oifname', 'proto', 'type', 'code', 'dport', 'ip daddr', 'ip6 daddr', 'sport',
+        'ip saddr', 'ip6 saddr', 'log prefix', 'counter', 'limit',
         'action', 'masquerade', 'snat to', 'dnat to', 'comment',
       ]
 
@@ -68,7 +65,9 @@ NFT_HC:
         dport: ['port', 'dest_port', 'dp']
         sport: ['sport', 'src_port', 'sp']
         'ip daddr': ['dest', 'destination', 'target', 'd']
+        'ip6 daddr': ['dest6', 'destination6', 'target', 'd6']
         'ip saddr': ['src', 'source', 's']
+        'ip6 saddr': ['src6', 'source6', 's6']
         'log prefix': ['log', 'l']
         comment: ['cmt', 'c']
         type: ['t']

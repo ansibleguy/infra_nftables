@@ -117,7 +117,7 @@
       tags: config
 
 - name: NFTables | Installing bash-completion
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: 'bash-completion'
     state: present
   when: NFT_CONFIG.enable.bash_completion

@@ -60,6 +60,10 @@
         - 'iifname "$int_private" tcp dport 8888 dnat ip to 192.168.10.1:8888'
         - 'oifname \"$int_private\" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } masquerade'
         - 'oifname \"$int_private2\" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } snat ip to 192.168.0.1'
+        # ipv6
+        - 'tcp dport { 80, 443 } ip6 daddr 2001:db8::1 accept comment \"v6 test1\"'
+        - 'udp dport 1339 ip6 saddr 2001:db8::1 accept comment \"v6 test2\"'
+        - 'udp dport 1339 ip6 daddr 2001:db8::1:1 ip6 saddr 2001:db8::1 accept comment \"v6 test3\"'
 
       ignore_errors: true
       register: rule_check
