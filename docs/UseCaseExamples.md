@@ -255,23 +255,36 @@ Docker is a special-case for using NFTables.
 
   **A:** One needs to perform a few tasks to successfully do so:
 
-  1. Edit the behaviour of the Docker service:
+  Edit the behaviour of the Docker service:
 
-    * Flag `--iptables=false`: MUST HAVE! Disables the management of IPTables rules by docker.
-    * Flag `--bridge=none`: If none of your containers needs a bridge - you should disable it. How to see if it is needed? Run `ip a` on the host - if any containers have their own IPs - they need a Bridge.
-    * Flag `--default-address-pool='base=172.18.0.0/16,size=24'`: Fix the network provided to your containers. Makes managing the ruleset easier.
+    * Flag `--iptables=false`:
 
-    In this example we will assume `bridge` is needed by the containers.
+      MUST HAVE! Disables the management of IPTables rules by docker.
 
-    ```text
-    # /etc/systemd/system/docker.service.d/override.conf
-    [Service]
-    ExecStart=
-    ExecStart=/usr/bin/dockerd --iptables=false
-    ExecStartPost=/usr/bin/systemctl reload nftables.service
-    ```
+    * Flag `--bridge=none`:
 
-  2. Tell the NFTables role that IPTables is OK.
+      If none of your containers needs a bridge - you should disable it.
+  
+      How to see if it is needed?
+
+      Run `ip a` on the host - if any containers have their own IPs - they need a Bridge.
+
+      In this example we will assume `bridge` is needed by the containers.
+
+    * Flag `--default-address-pool='base=NET/CIDR,size=CIDR'`:
+
+      Fixate the network provided to your containers. Makes managing the ruleset easier.
+
+    * Example service override `/etc/systemd/system/docker.service.d/override.conf`
+
+      ```text
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/dockerd --iptables=false --default-address-pool='base=172.18.0.0/16,size=24
+      ExecStartPost=/usr/bin/systemctl reload nftables.service
+      ```
+
+  Tell the NFTables role that IPTables is OK.
 
   ```yaml
   nftables:
