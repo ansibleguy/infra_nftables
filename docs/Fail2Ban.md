@@ -42,7 +42,7 @@ Settings in '/etc/fail2ban/action.d/nftables-common.local'
 ```
 [Init]
 nftables_family = inet
-nftables_table = table-to-use  # customizable
+nftables_table = table-to-use  # customizable; should NOT BE your primary table
 blocktype = drop
 # nftables_set_prefix = 'f2b'  # optional
 ```

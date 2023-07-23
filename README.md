@@ -29,9 +29,10 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 ## Documentation
 
 * NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)
-* Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/main/Example.md)!
-* Integration of [Fail2Ban with NFTables](https://github.com/ansibleguy/infra_nftables/blob/main/Fail2Ban.md)
-* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md)
+* Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Example.md)!
+* [Practical Use-Cases](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/UseCaseExamples.md) (_Docker, Proxmox, Network firewall_)
+  * Integration of [Fail2Ban with NFTables](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Fail2Ban.md)
+* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md)
 
 ## Functionality
 
@@ -91,7 +92,7 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 
 * **Warning:** Some **core functionalities** (_NAT/Sets_) might **not be supported by mainstream Distribution kernels**.
 
-  See: [Troubleshooting Guide - 'Unsupported Operation'](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md#unsupported-operation)
+  See: [Troubleshooting Guide - 'Unsupported Operation'](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md#unsupported-operation)
 
 
 * **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure **hooks and priorities**!
@@ -177,7 +178,7 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 
 ## Troubleshoot
 
-* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/main/Troubleshoot.md)
+* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md)
 
 ## Usage
 
