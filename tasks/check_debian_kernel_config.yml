@@ -26,12 +26,12 @@
   ansible.builtin.assert:
     that:
       - "'CONFIG_NF_TABLES_SET=m' in nft_kernel_config.stdout_lines"
-  when: NFT_CONFIG.enable.sets
+  when: NFT_CONFIG.enable.sets | bool
   tags: always
 
 - name: NFTables | Checking kernel config for nat
   ansible.builtin.assert:
     that:
       - "'CONFIG_NFT_NAT=m' in nft_kernel_config.stdout_lines"
-  when: NFT_CONFIG.enable.nat
+  when: NFT_CONFIG.enable.nat | bool
   tags: always

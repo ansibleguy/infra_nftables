@@ -21,11 +21,14 @@ defaults_nftables:
 
   tables: {}
   vars: {}  # vars shared by all tables
-  settings:
-    purge: true  # purge all unmanaged files from /etc/nftables.d/
+  purge_orphaned: true  # purge all unmanaged files from /etc/nftables.d/
 
   log_group: ''  # set to '0' for container workaround => send logs to local ulogd2 daemon
   ext: 'nft'  # extension used for nftables config-files
+
+  path:
+    config_dir: '/etc/nftables.d'
+    config_file: '/etc/nftables.conf'
 
 defaults_table:
   type: 'inet'  # inet, ip6, ip4, arp, bridge, netdev

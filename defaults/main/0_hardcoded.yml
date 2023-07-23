@@ -1,10 +1,6 @@
 ---
 
 NFT_HC:
-  path:
-    config_dir: '/etc/nftables.d'
-    base_file: '/etc/nftables.conf'
-
   choices:
     table:
       types: ['inet', 'ip6', 'ip', 'arp', 'bridge', 'netdev']

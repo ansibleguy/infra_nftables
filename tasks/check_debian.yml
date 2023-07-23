@@ -11,7 +11,7 @@
     name: 'nf_tables_set'
     state: present
   check_mode: true
-  when: NFT_CONFIG.enable.sets
+  when: NFT_CONFIG.enable.sets | bool
 
 - name: NFTables | Check | Kernel config
   ansible.builtin.import_tasks: check_debian_kernel_config.yml

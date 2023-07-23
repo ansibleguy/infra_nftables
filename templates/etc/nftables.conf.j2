@@ -18,4 +18,4 @@ include "/etc/nftables.d/addons/*.{{ NFT_CONFIG.ext }}"
 # END ANSIBLE MANAGED BLOCK ansibleguy.addons_nftables
 {% endif %}
 
-include "{{ NFT_HC.path.config_dir }}/*.{{ NFT_CONFIG.ext }}"
+include "{{ NFT_CONFIG.path.config_dir }}/*.{{ NFT_CONFIG.ext }}"

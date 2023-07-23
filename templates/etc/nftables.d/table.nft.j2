@@ -6,7 +6,7 @@ table {{ nft_table.type }} {{ nft_table_name }} {
 {% for chain_name, chain_item in nft_table.chains.items() %}
 {%   set chain = defaults_chain | combine(nftables.defaults.chain | default({}), recursive=true) | combine(chain_item, recursive=true) %}
 {%   set chain_main = chain.hook is not none %}
-{%   set chain_rules = chain.rules | nftables_merge_sort_translate_rules(NFT_CONFIG, nft_table, chain_name, NFT_HC) %}
+{%   set chain_rules = chain.rules | nftables_rules_merge_sort_translate(NFT_CONFIG, nft_table, chain_name, NFT_HC) %}
   chain {{ chain_name }} {
 {% if chain_main %}
     type {{ chain.type }} hook {{ chain.hook }} priority {{ chain.priority }}; policy {{ chain.policy }};

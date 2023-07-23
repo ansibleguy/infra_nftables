@@ -6,8 +6,8 @@
       nft_chain.type in NFT_HC.choices.chain.types and
       nft_chain.hook in NFT_HC.choices.hook[nft_table.type][nft_chain.type] and
       nft_chain.rules |
-      nftables_merge_rules(NFT_CONFIG, nft_table, nft_chain_name) |
-      nftables_unique_sequence(NFT_HC.rules.sort)
+      nftables_rules_merge(NFT_CONFIG, nft_table, nft_chain_name) |
+      nftables_rules_unique_sequence(NFT_HC.rules.sort)
   ignore_errors: true
   register: nft_config_check_chain
   tags: config

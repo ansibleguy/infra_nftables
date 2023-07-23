@@ -36,7 +36,7 @@
 - name: NFTables | Debian 10 Installation
   ansible.builtin.import_tasks: debian10.yml
   when:
-    - NFT_CONFIG.enable.deb11_backport
+    - NFT_CONFIG.enable.deb11_backport | bool
     - ansible_os_family | lower == 'debian'
     - ansible_distribution_major_version == '10'
 
@@ -48,15 +48,15 @@
 - name: NFTables | Adding config directory
   ansible.builtin.file:
     state: directory
-    path: "{{ NFT_HC.path.config_dir }}"
+    path: "{{ NFT_CONFIG.path.config_dir }}"
     mode: 0750
     owner: 'root'
     group: 'root'
 
 - name: NFTables | Copying base config
   ansible.builtin.template:
-    src: "templates{{ NFT_HC.path.base_file }}.j2"
-    dest: "{{ NFT_HC.path.base_file }}"
+    src: "templates{{ NFT_CONFIG.path.config_file }}.j2"
+    dest: "{{ NFT_CONFIG.path.config_file }}"
     mode: 0640
     owner: 'root'
     group: 'root'
@@ -67,7 +67,7 @@
 
 - name: NFTables | Copying base config for debugging (/tmp/nftables.nft)
   ansible.builtin.template:
-    src: "templates{{ NFT_HC.path.base_file }}.j2"
+    src: "templates{{ NFT_CONFIG.path.config_file }}.j2"
     dest: '/tmp/nftables.nft'
     mode: 0640
     owner: 'root'
@@ -85,18 +85,18 @@
     - nft_config_base.failed
 
 - name: NFTables | Checking for existing config-files
-  ansible.builtin.command: "ls {{ NFT_HC.path.config_dir }}"
+  ansible.builtin.command: "ls {{ NFT_CONFIG.path.config_dir }}"
   register: nft_config_files
   changed_when: false
-  when: NFT_CONFIG.settings.purge
+  when: NFT_CONFIG.purge_orphaned | bool
   tags: [config, purge]
 
 - name: NFTables | Purging unmanaged config-files
   ansible.builtin.file:
-    path: "{{ NFT_HC.path.config_dir }}/{{ item }}"
+    path: "{{ NFT_CONFIG.path.config_dir }}/{{ item }}"
     state: absent
   when:
-    - NFT_CONFIG.settings.purge
+    - NFT_CONFIG.purge_orphaned | bool
     - item | split('.') | first not in NFT_CONFIG.tables
   loop: "{{ nft_config_files.stdout_lines }}"
   tags: [config, purge]
@@ -121,7 +121,7 @@
   ansible.builtin.package:
     name: 'bash-completion'
     state: present
-  when: NFT_CONFIG.enable.bash_completion
+  when: NFT_CONFIG.enable.bash_completion | bool
 
 - name: NFTables | Adding bash-completion
   ansible.builtin.copy:
@@ -130,7 +130,7 @@
     mode: 0644
     owner: 'root'
     group: 'root'
-  when: NFT_CONFIG.enable.bash_completion
+  when: NFT_CONFIG.enable.bash_completion | bool
 
 - name: NFTables | Enabling bash-completion (for root in bashrc)
   ansible.builtin.blockinfile:
@@ -146,14 +146,14 @@
       fi
     marker: "# {mark} ansibleguy.infra_nftables bash-completion"
     state: present
-  when: NFT_CONFIG.enable.bash_completion
+  when: NFT_CONFIG.enable.bash_completion | bool
 
 - name: NFTables | Disabling bash-completion (for root in bashrc)
   ansible.builtin.blockinfile:
     path: '/root/.bashrc'
     marker: "# {mark} ansibleguy.infra_nftables bash-completion"
     state: absent
-  when: not NFT_CONFIG.enable.bash_completion
+  when: not NFT_CONFIG.enable.bash_completion | bool
 
 - name: NFTables | Enabling/Starting service
   ansible.builtin.service:
