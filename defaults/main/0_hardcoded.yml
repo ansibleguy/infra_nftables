@@ -103,6 +103,3 @@ NFT_HC:
       drop_log_prefix: 'DROP'
 
       raw_key: ['raw', 'r']
-
-  # todo: nftables CAN operate while iptables is installed (p.e. docker needs it)
-  incompatible_packages: ['iptables', 'ufw']

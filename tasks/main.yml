@@ -20,10 +20,10 @@
   register: nft_packages
   tags: config
 
-- name: "NFTables | Failing if incompatible packages are installed ({{ NFT_HC.incompatible_packages | join(', ') }})"
+- name: "NFTables | Failing if incompatible packages are installed ({{ NFT_CONFIG.incompatible_packages | join(', ') }})"
   ansible.builtin.assert:
     that:
-      - ansible_facts.packages | intersect(NFT_HC.incompatible_packages) | length == 0
+      - ansible_facts.packages | intersect(NFT_CONFIG.incompatible_packages) | length == 0
   when:
     - nft_packages.failed is undefined or not nft_packages.failed
     - "'packages' in ansible_facts and 'nftables' not in ansible_facts.packages"

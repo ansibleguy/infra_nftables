@@ -30,6 +30,8 @@ defaults_nftables:
     config_dir: '/etc/nftables.d'
     config_file: '/etc/nftables.conf'
 
+  incompatible_packages: ['iptables', 'ufw']  # can be set to ['ufw'] if iptables is needed (p.e. if docker is in use)
+
 defaults_table:
   type: 'inet'  # inet, ip6, ip4, arp, bridge, netdev
   chains: {}
