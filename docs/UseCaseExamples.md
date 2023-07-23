@@ -397,6 +397,17 @@ You could - of course - also limit the VM/Container traffic.
 
 For simplicity's sake we don't cover IPv6 in this example.
 
+### Prerequisites
+
+As the `pve-firewall` has a dependency on IPTables - we have to tell NFTables that it's OK when the package is installed:
+
+```yaml
+nftables:
+  incompatible_packages: ['ufw']  # default = ['iptables', 'ufw']
+```
+
+Of course - if using NFTables you SHOULD NOT enable the firewall of the Proxmox PVE itself. (_available in WebUI_)
+
 ### DNS
 
 ```yaml
