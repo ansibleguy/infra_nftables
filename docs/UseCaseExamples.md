@@ -6,15 +6,133 @@ I'm not perfect - please open an [Issue](https://github.com/ansibleguy/infra_nft
 
 ----
 
-## Security baseline
+## Baseline
 
-One should block known attacks that allowed target transport protocols like TCP.
+Example for a very basic ruleset on a IPv4-only host.
 
-ICMP traffic should also be limited on public interfaces.
+```yaml
+vars:
+  private_ranges: ['192.168.0.0/16', '172.16.0.0/12', '10.0.0.0/8']
+  ports_internal: [53, 123, 80, 443]  # specify services that are used between your own hosts
+  type_icmpv4_basic:
+    - 'destination-unreachable'
+    - 'echo-reply'
+    - 'echo-request'
+    - 'time-exceeded'
+    - 'parameter-problem'
+  code_icmpv4_basic: [30]  # traceroute
 
-You can also use the [ansibleguy.addons_nftables](https://github.com/ansibleguy/addons_nftables) to tighten:
-* your outbound rules by only allowing DNS-based destinations
-* your input rules by implementing IP-blocklists (_Tor exit nodes, Spamhaus, ..._)
+chains:
+  input:
+    hook: 'input'
+    policy: 'drop'
+    rules:
+      - {if: 'lo', comment: 'Allow loopback traffic'}
+      - {raw: 'ct state { established, related } accept comment "Allow open sessions"'}
+      - {proto: 'icmp', type: '$type_icmpv4_basic'}
+      - {proto: 'icmp', code: '$code_icmpv4_basic'}
+
+      - {src: '$private_ranges', port: 22, proto: tcp, comment: 'Allow SSH'}
+      - {src: '$private_ranges', proto: ['tcp', 'udp'], port: '$ports_internal', comment: 'Allow internal services'}
+
+  output:
+    hook: 'output'
+    policy: 'drop'
+    rules:
+      - {of: 'lo', comment: 'Allow loopback traffic'}
+      - {raw: 'ct state { established, related } accept comment "Allow open sessions"'}
+      - {proto: 'icmp', type: '$type_icmpv4_basic'}
+      - {proto: 'icmp', code: '$code_icmpv4_basic'}
+
+      - {proto: ['tcp', 'udp'], port: '$ports_internal', dest: '$private_ranges', comment: 'Allow internal services'}
+
+      # you can log specific traffic even if allowed (but only on new connections since you don't want to spam your logs..)    
+      - {raw: "ct state new tcp dport { 80, 443, 123 } ip daddr != $private_ranges log prefix \"NFTables OUT PUBLIC \""}
+      - {proto: ['tcp', 'udp'], port: [80, 443, 123, 53], dest: '!= $private_ranges'}
+
+  nat:
+    hook: 'postrouting'
+    priority: -100
+    type: 'nat'
+    policy: 'accept'
+    rules:
+      - {src: '$private_ranges', dest: '!= $private_ranges', masquerade: true}
+```
+
+----
+
+## IPv6 Baseline
+
+Example for a very basic ruleset on a IPv6-only host.
+
+**BE AWARE**: IPv6 might break completely if ICMP6 is blocked for any reason
+
+```yaml
+vars:
+  trusted_ranges: ['...']  # add your own ipv6 networks/ranges (equivalent to 'private networks' on IPv4)
+  ports_internal: [53, 123, 80, 443]  # specify services that are used between your own hosts
+  type_icmpv6_basic:
+    - 'destination-unreachable'
+    - 'packet-too-big'
+    - 'time-exceeded'
+    - 'parameter-problem'
+    - 'mld-listener-query'
+    - 'mld-listener-reduction'
+    - 'mld-listener-done'
+    - 'mld-listener-report'
+    - 'mld2-listener-report'
+  type_icmpv6_neighbor:
+    - 'ind-neighbor-advert'
+    - 'ind-neighbor-solicit'
+    - 'nd-neighbor-advert'
+    - 'nd-neighbor-solicit'
+    - 'nd-router-solicit'
+
+chains:
+  input:
+    hook: 'input'
+    policy: 'drop'
+    rules:
+      - {proto: 'icmp6', type: '$type_icmpv6_basic'}
+      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 1 icmpv6 type $type_icmpv6_neighbor accept'}
+      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 255 icmpv6 type $type_icmpv6_neighbor accept'}
+
+      - {if: 'lo', comment: 'Allow loopback traffic'}
+      - {raw: 'ct state { established, related } accept comment "Allow open sessions"'}
+
+      - {src6: '$trusted_ranges', port: 22, proto: tcp, comment: 'Allow SSH'}
+      - {src6: '$trusted_ranges', proto: ['tcp', 'udp'], port: '$ports_internal', comment: 'Allow internal services'}
+
+  output:
+    hook: 'output'
+    policy: 'drop'
+    rules:
+      - {proto: 'icmp6', type: '$type_icmpv6_basic'}
+      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 1 icmpv6 type $type_icmpv6_neighbor accept'}
+      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 255 icmpv6 type $type_icmpv6_neighbor accept'}
+
+      - {of: 'lo', comment: 'Allow loopback traffic'}
+      - {raw: 'ct state { established, related } accept comment "Allow open sessions"'}
+
+      - {proto: ['tcp', 'udp'], port: '$ports_internal', dest6: '$trusted_ranges', comment: 'Allow internal services'}
+
+      # you can log specific traffic even if allowed (but only on new connections since you don't want to spam your logs..)    
+      - {raw: "ct state new tcp dport { 80, 443, 123 } ip6 daddr != $trusted_ranges log prefix \"NFTables OUT PUBLIC \""}
+      - {proto: ['tcp', 'udp'], port: [80, 443, 123, 53], dest6: '!= $trusted_ranges'}
+```
+
+
+----
+
+## Security Baseline
+
+* One should block known attacks that allowed target transport protocols like TCP.
+
+* ICMP traffic should also be limited on public interfaces.
+
+* You can also use the [ansibleguy.addons_nftables](https://github.com/ansibleguy/addons_nftables) to tighten:
+  * your outbound rules by only allowing DNS-based destinations
+  * your input rules by implementing IP-blocklists (_Tor exit nodes, Spamhaus, ..._)
 
 ```yaml
 vars:
@@ -28,7 +146,7 @@ vars:
     - 'mld-listener-done'
     - 'mld-listener-report'
     - 'mld2-listener-report'
-  type_icmpv6_basic_limit:
+  type_icmpv6_neighbor:
     - 'ind-neighbor-advert'
     - 'ind-neighbor-solicit'
     - 'nd-neighbor-advert'
@@ -74,8 +192,8 @@ chains:
 
       # BE AWARE: IPv6 might break completely if ICMP6 is blocked for any reason
       - {proto: 'icmp6', type: '$type_icmpv6_basic'}
-      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 1 icmpv6 type $type_icmpv6_basic_limit limit limit_icmp6_public drop'}
-      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 255 icmpv6 type $type_icmpv6_basic_limit limit limit_icmp6_public drop'}
+      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 1 icmpv6 type $type_icmpv6_neighbor limit limit_icmp6_public drop'}
+      - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 255 icmpv6 type $type_icmpv6_neighbor limit limit_icmp6_public drop'}
 
       # Block bogons on public interfaces
       - {src: '$net_bogons_v4', if: 'wan1', action: 'drop'}
@@ -129,12 +247,6 @@ To be done
 
 To be done
 
-
-----
-
-## IPv6
-
-To be done
 
 ----
 
