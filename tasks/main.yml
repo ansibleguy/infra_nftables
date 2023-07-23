@@ -1,7 +1,7 @@
 ---
 
 # todo: solution for 'ct state new => log' rules as they are commonly used
-# todo: solution for anti-lockout => rollback opt-in or config-validation (?)
+# todo: solution for anti-lockout => rollback opt-in or extended config-validation (?)
 
 - name: NFTables | Checking config
   ansible.builtin.assert:
@@ -10,7 +10,8 @@
       - nftables.tables is defined
       - NFT_CONFIG.tables | length > 0
       - NFT_CONFIG.tables[NFT_CONFIG.tables | list | first]['chains'] | default([]) | length > 0
-  tags: config
+      - not NFT_CONFIG.ext.startswith('.')
+  tags: always
 
 - name: NFTables | Pulling info on installed packages
   ansible.builtin.package_facts:

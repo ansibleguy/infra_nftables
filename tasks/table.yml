@@ -6,7 +6,7 @@
       - nft_table.type in NFT_HC.choices.table.types
   ignore_errors: true
   register: nft_config_check_table
-  tags: config
+  tags: always
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Informing user"
   ansible.builtin.fail:
@@ -37,7 +37,7 @@
 - name: "NFTables | Table '{{ nft_table_name }}' | Copying table config"
   ansible.builtin.template:
     src: "templates{{ NFT_HC.path.config_dir }}/table.nft.j2"
-    dest: "{{ NFT_HC.path.config_dir }}/{{ nft_table_name }}.nft"
+    dest: "{{ NFT_HC.path.config_dir }}/{{ nft_table_name }}.{{ NFT_CONFIG.ext }}"
     mode: 0640
     owner: 'root'
     group: 'root'

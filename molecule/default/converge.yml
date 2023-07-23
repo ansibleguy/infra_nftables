@@ -86,7 +86,7 @@
                 - {proto: 'udp', port: 51821, counter: 'invalid_packages', comment: 'Count wrong wireguard packets with pre-defined counter', action: none}
                 - {proto: 'tcp', port: [80, 443], comment: 'v6 test1', dest6: '2001:db8::1'}
                 - {proto: 'udp', port: 1339, comment: 'v6 test2', src6: '2001:db8::1'}
-                - {proto: 'udp', port: 1339, comment: 'v6 test3', src6: '2001:db8::1', dest6: '2001:db8:1:1'}
+                - {proto: 'udp', port: 1339, comment: 'v6 test3', src6: '2001:db8::1', dest6: '2001:db8::1:1'}
 
             outgoing:
               hook: 'output'
