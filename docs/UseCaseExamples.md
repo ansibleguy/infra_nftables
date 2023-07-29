@@ -280,7 +280,7 @@ Docker is a special-case for using NFTables.
       ```text
       [Service]
       ExecStart=
-      ExecStart=/usr/bin/dockerd --iptables=false --default-address-pool='base=172.18.0.0/16,size=24
+      ExecStart=/usr/bin/dockerd --iptables=false --default-address-pool='base=172.18.0.0/16,size=24'
       ExecStartPost=/usr/bin/systemctl reload nftables.service
       ```
 
