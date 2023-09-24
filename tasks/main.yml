@@ -26,7 +26,7 @@
       - ansible_facts.packages | intersect(NFT_CONFIG.incompatible_packages) | length == 0
   when:
     - nft_packages.failed is undefined or not nft_packages.failed
-    - "'packages' in ansible_facts and 'nftables' not in ansible_facts.packages"
+    - "'packages' in ansible_facts"
   tags: config
 
 - name: NFTables | Checking system

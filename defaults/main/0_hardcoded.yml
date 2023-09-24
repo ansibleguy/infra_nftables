@@ -50,9 +50,20 @@ NFT_HC:
     translate:
       # sequence of fields needed in nft config
       sequence: [
-        'iifname', 'oifname', 'proto', 'type', 'code', 'dport', 'ip daddr', 'ip6 daddr', 'sport',
-        'ip saddr', 'ip6 saddr', 'log prefix', 'counter', 'limit',
-        'action', 'masquerade', 'snat to', 'dnat to', 'comment',
+        # matching packets
+        'iifname', 'oifname', 'proto', 'type', 'code', 'sport', 'dport', 'ip daddr', 'ip6 daddr',
+        'ip saddr', 'ip6 saddr',
+        # meta matches
+        'meta skuid', 'meta skgid', 'meta mark', 'meta priority',
+        'meta time', 'meta day', 'meta hour',
+
+        # sub-actions
+        'log prefix', 'counter', 'limit',
+        # actions
+        'action', 'masquerade', 'snat to', 'dnat to',
+
+        # appendix
+        'comment',
       ]
 
       aliases:  # config to nft field translation
@@ -76,6 +87,14 @@ NFT_HC:
         'redirect to': ['redir', 'redirect']
         masquerade: ['masque', 'm']
         limit: ['lim']
+        'meta skuid': ['user', 'uid']
+        'meta skgid': ['group', 'gid']
+        'meta mark': ['mark']
+        'meta priority': ['prio', 'priority']
+        'meta length': ['length', 'len']
+        'meta time': ['time', 'timestamp']
+        'meta day': ['day']
+        'meta hour': ['hour']
 
       remove:  # some special cases
         key: ['proto', 'action']
@@ -89,7 +108,10 @@ NFT_HC:
             append: 'name'
 
       # values should be in quotes
-      quote: ['comment', 'iifname', 'oifname', 'log prefix']
+      quote: [
+        'comment', 'iifname', 'oifname', 'log prefix',
+        'meta skuid', 'meta skgid', 'meta time', 'meta day', 'meta hour',
+      ]
 
       # default values if not provided
       defaults:
