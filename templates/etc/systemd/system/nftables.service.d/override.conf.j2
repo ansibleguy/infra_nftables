@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+# ansibleguy.infra_nftables
+
+[Unit]
+Documentation=https://github.com/ansibleguy/infra_nftables
+
+[Service]
+ExecStartPre=/usr/sbin/nft -cf /etc/nftables.conf
+
+ExecReload=
+ExecReload=/usr/sbin/nft -cf /etc/nftables.conf
+ExecReload=/usr/sbin/nft -f /etc/nftables.conf
+
+Restart=on-failure
+RestartSec=5s

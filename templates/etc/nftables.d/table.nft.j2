@@ -1,5 +1,8 @@
 #!/usr/sbin/nft -f
 
+# {{ ansible_managed }}
+# ansibleguy.infra_nftables
+
 table {{ nft_table.type }} {{ nft_table_name }} {
 {% include "_includes/definition_table.j2" %}
 
