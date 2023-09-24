@@ -128,6 +128,32 @@ nftables:
             - {'src': '$private_ranges', oif: 'eno3', snat: '192.168.0.1'}  # static outbound nat
 ```
 
+If you want to **merge group- & host-rules** you could do it like that:
+
+```yaml
+# define the basic ruleset used by all hosts as: 'fw_rules_all'
+# define service-specific rules as: 'fw_rules_group'
+# define host-specific rules as: 'fw_rules_host'
+
+- name: NFTables
+  become: true
+  hosts: all
+  vars:
+    nftables:
+      tables:
+        example:
+          chains: "{{ fw_rules_all |
+          combine(fw_rules_group|default({}), recursive=true, list_merge='append') |
+          combine(fw_rules_host|default({}), recursive=true, list_merge='append') }}"
+
+  pre_tasks:
+    - debug:
+        var: nftables
+
+  roles:
+    - ansibleguy.infra_nftables
+```
+
 ### Execution
 
 Run the playbook:
