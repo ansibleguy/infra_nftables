@@ -52,7 +52,7 @@ nftables:
   #   sets: true
   #   nat: true
   #   deb11_backport: false  # use debian11 backports repository to install newer version on debian 10
-  #   bash_completion: true
+  #   bash_completion: false
 
   _defaults:  # defaults inherited by all tables and chains
     table:
@@ -210,10 +210,10 @@ ansible-playbook -K -D -i inventory/hosts.yml playbook.yml -e debug=yes
 
   * **Default opt-ins**:
     * Purging of unmanaged config-files stored in '/etc/nftables.d/'
-    * Adding [bash-completion script](https://patchwork.ozlabs.org/project/netfilter-devel/patch/1454691182-6573-1-git-send-email-giuseppelng@gmail.com/) for the 'nft' command
 
   * **Default opt-outs**:
     * Installing NFTables from Debian 11 backports when running on Debian 10 (_newer version_)
+    * Adding [bash-completion script](https://patchwork.ozlabs.org/project/netfilter-devel/patch/1454691182-6573-1-git-send-email-giuseppelng@gmail.com/) for the 'nft' command
 
 ----
 

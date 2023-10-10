@@ -122,6 +122,6 @@ NFT_HC:
 
       # add generic drop logging to any rule that drops packages
       drop_log: true
-      drop_log_prefix: 'DROP'
+      drop_log_prefix: "{{ NFT_CONFIG.log_drop_prefix }}"
 
       raw_key: ['raw', 'r']

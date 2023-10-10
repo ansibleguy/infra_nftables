@@ -8,7 +8,7 @@ defaults_nftables:
     sets: true
     nat: true
     deb11_backport: false
-    bash_completion: true
+    bash_completion: false
 
   _defaults:
     table: {}
@@ -23,6 +23,7 @@ defaults_nftables:
   vars: {}  # vars shared by all tables
   purge_orphaned: true  # purge all unmanaged files from /etc/nftables.d/
 
+  log_drop_prefix: 'NFTables DROP'
   log_group: ''  # set to '0' for container workaround => send logs to local ulogd2 daemon
   ext: 'nft'  # extension used for nftables config-files
 
