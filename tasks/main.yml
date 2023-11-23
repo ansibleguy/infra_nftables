@@ -11,7 +11,6 @@
       - NFT_CONFIG.tables | length > 0
       - NFT_CONFIG.tables[NFT_CONFIG.tables | list | first]['chains'] | default([]) | length > 0
       - not NFT_CONFIG.ext.startswith('.')
-  tags: always
 
 - name: NFTables | Pulling info on installed packages
   ansible.builtin.package_facts:

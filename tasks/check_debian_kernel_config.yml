@@ -21,17 +21,18 @@
       - "'CONFIG_NF_TABLES_INET=y' in nft_kernel_config.stdout_lines"
       - "'CONFIG_NF_TABLES_IPV4=y' in nft_kernel_config.stdout_lines"
   tags: always
+  when: nft_kernel_config is defined
 
 - name: NFTables | Checking kernel config for sets
   ansible.builtin.assert:
     that:
       - "'CONFIG_NF_TABLES_SET=m' in nft_kernel_config.stdout_lines"
-  when: NFT_CONFIG.enable.sets | bool
+  when: NFT_CONFIG.enable.sets | bool and nft_kernel_config is defined
   tags: always
 
 - name: NFTables | Checking kernel config for nat
   ansible.builtin.assert:
     that:
       - "'CONFIG_NFT_NAT=m' in nft_kernel_config.stdout_lines"
-  when: NFT_CONFIG.enable.nat | bool
+  when: NFT_CONFIG.enable.nat | bool and nft_kernel_config is defined
   tags: always
