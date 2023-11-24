@@ -18,8 +18,8 @@
   ansible.builtin.assert:
     that:
       - "'CONFIG_NF_TABLES=m' in nft_kernel_config.stdout_lines"
-      - "'CONFIG_NF_TABLES_INET=y' in nft_kernel_config.stdout_lines"
-      - "'CONFIG_NF_TABLES_IPV4=y' in nft_kernel_config.stdout_lines"
+      - "'CONFIG_NF_TABLES_INET=y' in nft_kernel_config.stdout_lines or 'CONFIG_NF_TABLES_INET=m' in nft_kernel_config.stdout_lines"
+      - "'CONFIG_NF_TABLES_IPV4=y' in nft_kernel_config.stdout_lines or 'CONFIG_NF_TABLES_IPV4=m' in nft_kernel_config.stdout_lines"
   tags: always
 
 - name: NFTables | Checking kernel config for sets
