@@ -15,7 +15,7 @@
 
 - name: NFTables | Check | Kernel config
   ansible.builtin.import_tasks: check_debian_kernel_config.yml
-  tags: always
+  tags: [config, purge]
   when: >
     ansible_virtualization_role is undefined or
     ansible_virtualization_role != 'guest' or

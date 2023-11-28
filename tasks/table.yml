@@ -6,7 +6,7 @@
       - nft_table.type in NFT_HC.choices.table.types
   ignore_errors: true
   register: nft_config_check_table
-  tags: always
+  tags: [config, purge]
 
 - name: "NFTables | Table '{{ nft_table_name }}' | Informing user"
   ansible.builtin.fail:
