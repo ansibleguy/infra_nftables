@@ -34,7 +34,7 @@ defaults_nftables:
   incompatible_packages: ['iptables', 'ufw']  # can be set to ['ufw'] if iptables is needed (p.e. if docker is in use)
 
 defaults_table:
-  type: 'inet'  # inet, ip6, ip4, arp, bridge, netdev
+  type: 'inet'  # inet, ip6, ip, arp, bridge, netdev
   chains: {}
   _defaults:
     rules:

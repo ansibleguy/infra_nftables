@@ -17,7 +17,7 @@ NFT_HC:
         filter: ['prerouting', 'forward', 'input', 'output', 'postrouting']
         nat: ['prerouting', 'input', 'output', 'postrouting']
         route: ['output']
-      ip4:
+      ip:
         filter: ['prerouting', 'forward', 'input', 'output', 'postrouting']
         nat: ['prerouting', 'input', 'output', 'postrouting']
         route: ['output']
