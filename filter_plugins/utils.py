@@ -9,6 +9,7 @@ class FilterModule(object):
             "nftables_format_counter": self.nftables_format_counter,
             "nftables_format_limit": self.nftables_format_limit,
             "nftables_format_set": self.nftables_format_set,
+            "check_kernel_module": self.check_kernel_module,
         }
 
     @staticmethod
@@ -71,3 +72,11 @@ class FilterModule(object):
             lines.append(cls._format_comment(config['comment']))
 
         return cls._format_lines(whitespace=whitespace, lines=lines)
+
+    @staticmethod
+    def check_kernel_module(mod: str, kernel_mods: list) -> bool:
+        if not isinstance(kernel_mods, list):
+            return True  # container etc
+
+        return f'{mod}=y' in kernel_mods or f'{mod}=m' in kernel_mods
+

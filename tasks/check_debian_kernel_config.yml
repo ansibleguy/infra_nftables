@@ -4,7 +4,7 @@
   ansible.builtin.shell: 'cat "/boot/config-$(uname -r)" | grep -E "CONFIG_NFT|CONFIG_NF_TABLES"'
   args:
     executable: '/bin/bash'
-  register: nft_kernel_config
+  register: nft_kernel_cnf
   changed_when: false
   check_mode: false
   tags: skip_ansible_lint  # 'set -o pipefail' will lead to no output
@@ -17,21 +17,91 @@
 - name: NFTables | Check | Checking kernel config
   ansible.builtin.assert:
     that:
-      - "'CONFIG_NF_TABLES=m' in nft_kernel_config.stdout_lines"
-      - "'CONFIG_NF_TABLES_INET=y' in nft_kernel_config.stdout_lines"
-      - "'CONFIG_NF_TABLES_IPV4=y' in nft_kernel_config.stdout_lines"
-  tags: always
+      - "'CONFIG_NF_TABLES' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+      - "not NFT_CONFIG.enable.reject | bool or 'CONFIG_NFT_REJECT' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
 
-- name: NFTables | Checking kernel config for sets
+- name: NFTables | Check | Checking kernel config for TABLE-INET
   ansible.builtin.assert:
     that:
-      - "'CONFIG_NF_TABLES_SET=m' in nft_kernel_config.stdout_lines"
+      - "'CONFIG_NF_TABLES_INET' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+      - "not NFT_CONFIG.enable.reject | bool or 'CONFIG_NFT_REJECT_INET' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+
+- name: NFTables | Check | Checking kernel config for TABLE-IP(4)
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES_IPV4' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+      - "not NFT_CONFIG.enable.reject | bool or 'CONFIG_NFT_REJECT_IPV4' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+
+- name: NFTables | Check | Checking kernel config for TABLE-IP6
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES_IPV6' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+      - "not NFT_CONFIG.enable.reject | bool or 'CONFIG_NFT_REJECT_IPV6' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+
+- name: NFTables | Checking kernel config for TABLE-NETDEV
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES_NETDEV' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+      - "not NFT_CONFIG.enable.reject | bool or 'CONFIG_NFT_REJECT_NETDEV' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.table_netdev | bool
+
+- name: NFTables | Checking kernel config for TABLE-BRIDGE
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES_BRIDGE=' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+      - "not NFT_CONFIG.enable.reject | bool or 'CONFIG_NFT_BRIDGE_REJECT' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.table_bridge | bool
+
+- name: NFTables | Checking kernel config for SETS
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NF_TABLES_SET' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
   when: NFT_CONFIG.enable.sets | bool
-  tags: always
 
-- name: NFTables | Checking kernel config for nat
+- name: NFTables | Checking kernel config for NAT
   ansible.builtin.assert:
     that:
-      - "'CONFIG_NFT_NAT=m' in nft_kernel_config.stdout_lines"
+      - "'CONFIG_NFT_NAT' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
   when: NFT_CONFIG.enable.nat | bool
-  tags: always
+
+- name: NFTables | Checking kernel config for REDIR
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_REDIR' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.redir | bool
+
+- name: NFTables | Checking kernel config for TPROXY
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_TPROXY' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.tproxy | bool
+
+- name: NFTables | Checking kernel config for SYNPROXY
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_SYNPROXY' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.synproxy | bool
+
+- name: NFTables | Checking kernel config for SOCKET
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_SOCKET' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.socket | bool
+
+- name: NFTables | Checking kernel config for TUNNEL
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_TUNNEL' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.tunnel | bool
+
+- name: NFTables | Checking kernel config for QUOTA
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_QUOTA' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.quota | bool
+
+- name: NFTables | Checking kernel config for CONNLIMIT
+  ansible.builtin.assert:
+    that:
+      - "'CONFIG_NFT_CONNLIMIT' | check_kernel_module(nft_kernel_cnf.stdout_lines)"
+  when: NFT_CONFIG.enable.connlimit | bool

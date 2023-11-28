@@ -5,8 +5,22 @@ nftables: {}
 # default config => is overwritten by provided config
 defaults_nftables:
   enable:
+    # will check if kernel modules are available
     sets: true
     nat: true
+    redir: true
+    reject: false
+    tproxy: false
+    synproxy: false
+    socket: false
+    quota: false
+    tunnel: false
+    connlimit: false
+    table_inet: true
+    table_ip4: true
+    table_ip6: false
+    table_netdev: false
+    table_bridge: false
     deb11_backport: false
     bash_completion: false
 
