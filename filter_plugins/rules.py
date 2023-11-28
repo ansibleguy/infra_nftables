@@ -37,7 +37,11 @@ class FilterModule(object):
 
     @classmethod
     def nftables_format_var(cls, key: str, value: (str, list)) -> str:
-        return f"define { cls.nftables_safe_name(key) } = {cls.nftables_format_list(value)}"
+        if isinstance(value, list):
+            return f"define {cls.nftables_safe_name(key)} = {cls.nftables_format_list(value)}"
+
+        else:
+            return f"define {cls.nftables_safe_name(key)} = {value}"
 
     @classmethod
     def _translate_rule(
