@@ -19,6 +19,10 @@ Role to provision NFTables firewall on linux servers.
 ## Install
 
 ```bash
+# latest
+ansible-galaxy role install git+https://github.com/ansibleguy/infra_nftables
+
+# from galaxy
 ansible-galaxy install ansibleguy.infra_nftables
 
 # or to custom role-path
