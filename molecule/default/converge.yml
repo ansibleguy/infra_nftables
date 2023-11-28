@@ -113,6 +113,20 @@
               rules:
                 - {'src': '$private_ranges', oif: '$int_private', masquerade: true}  # dynamic outbound nat
                 - {'src': '$private_ranges', oif: '$int_private2', snat: '192.168.0.1'}  # static outbound nat
+        example6:
+          type: 'ip6'
+          chains:
+            test:
+              hook: 'output'
+              rules:
+                - {'src6': '2001:db8::1/128'}
+        example4:
+          type: 'ip'
+          chains:
+            test:
+              hook: 'output'
+              rules:
+                - {'src': '192.168.0.1/32'}
 
   roles:
     - ansibleguy.infra_nftables
