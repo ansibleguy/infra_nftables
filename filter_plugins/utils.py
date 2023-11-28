@@ -79,4 +79,3 @@ class FilterModule(object):
             return True  # container etc
 
         return f'{mod}=y' in kernel_mods or f'{mod}=m' in kernel_mods
-
