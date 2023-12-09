@@ -12,10 +12,11 @@ Role to provision NFTables firewall on linux servers.
 [![Ansible-Lint Test Status](https://badges.ansibleguy.net/infra_nftables.ansiblelint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/ansiblelint.sh.j2)
 [![Ansible Galaxy](https://badges.ansibleguy.net/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/ansibleguy/infra_nftables)
 
-[Molecule Logs (if failed)](https://badges.ansibleguy.net/log/molecule_infra_nftables_test.log)
+Molecule Logs: [Short](https://badges.ansibleguy.net/log/molecule_infra_nftables_test_short.log), [Full](https://badges.ansibleguy.net/log/molecule_infra_nftables_test.log)
 
 **Tested:**
 * Debian 11
+* Debian 12
 
 ## Install
 
