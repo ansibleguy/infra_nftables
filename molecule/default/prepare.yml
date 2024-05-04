@@ -2,14 +2,17 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: no
   tasks:
     - name: Installing Role dependencies
       ansible.builtin.apt:
         name: ['kmod']
         state: present
+        update_cache: true
 
 - name: Prepare tester
   hosts: test-ag-nftables-tester
+  gather_facts: no
   tasks:
     - name: Installing testing utils
       ansible.builtin.apt:
