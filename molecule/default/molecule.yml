@@ -21,8 +21,8 @@ platforms:
     # docker config
     docker_host: 'tcp://molecule-docker.local:2375'
     purge_networks: true
-    image: 'debian:11-slim'
-    dockerfile: 'Dockerfile_debian11_systemd.j2'
+    image: 'debian:12-slim'
+    dockerfile: 'Dockerfile_debian12_systemd.j2'
     build_image: yes
     tmpfs: ['/tmp', '/run', '/run/lock']
     privileged: true
@@ -37,8 +37,8 @@ platforms:
     # docker config
     docker_host: 'tcp://molecule-docker.local:2375'
     purge_networks: true
-    image: 'debian:11-slim'
-    dockerfile: 'Dockerfile_debian11_systemd.j2'
+    image: 'debian:12-slim'
+    dockerfile: 'Dockerfile_debian12_systemd.j2'
     build_image: yes
     tmpfs: ['/tmp', '/run', '/run/lock']
     privileged: true
