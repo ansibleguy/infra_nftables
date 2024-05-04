@@ -17,32 +17,20 @@ platforms:
       - name: 'test-ag-nftables'
         ipv4_address: '192.168.9.1'
     groups: [grp_targets]
-
-    # docker config
     docker_host: 'tcp://molecule-docker.local:2375'
-    purge_networks: true
-    image: 'debian:12-slim'
-    dockerfile: 'Dockerfile_debian12_systemd.j2'
-    build_image: yes
+    image: 'ansible0guy/molecule:debian-latest'
     tmpfs: ['/tmp', '/run', '/run/lock']
     privileged: true
-    command: '/sbin/init'
 
   - name: test-ag-nftables-1
     networks:
       - name: 'test-ag-nftables'
         ipv4_address: '192.168.9.2'
     groups: [grp_targets]
-
-    # docker config
     docker_host: 'tcp://molecule-docker.local:2375'
-    purge_networks: true
-    image: 'debian:12-slim'
-    dockerfile: 'Dockerfile_debian12_systemd.j2'
-    build_image: yes
+    image: 'ansible0guy/molecule:debian-latest'
     tmpfs: ['/tmp', '/run', '/run/lock']
     privileged: true
-    command: '/sbin/init'
 
 provisioner:
   name: ansible
