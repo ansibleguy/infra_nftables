@@ -136,10 +136,10 @@
     loop_var: nft_table_item
   with_dict: "{{ NFT_CONFIG.tables }}"
   no_log: true  # less verbose output
-  tags: config
+  tags: [config, config_table]
   args:
     apply:
-      tags: config
+      tags: [config, config_table]
 
 - name: NFTables | Installing bash-completion
   ansible.builtin.package:

@@ -133,12 +133,13 @@ class FilterModule(object):
         if config['drop_log'] and 'action' in translation and \
                 translation['action'] == 'drop' and 'log prefix' not in mapping:
             if 'comment' in translation:
-                _comment = translation['comment'].replace('comment ', '')
+                _log = translation['comment'].replace('comment ', '')
+                _log = f"\"{config['drop_log_prefix']} {_log[1:-1]} \""
 
             else:
-                _comment = f"\"{config['drop_log_prefix']}\""
+                _log = f"\"{config['drop_log_prefix']} \""
 
-            translation['log prefix'] = f"log prefix {_comment}"
+            translation['log prefix'] = f"log prefix {_log}"
 
             if log_group not in NONE_VALUES and str(log_group).isnumeric():
                 translation['log prefix'] = f"{translation['log prefix']} group {log_group}"
