@@ -171,6 +171,7 @@ ansible-playbook -K -D -i inventory/hosts.yml playbook.yml
 ```
 
 There are also some useful **tags** available:
+* config_table => only provision actual rulesets
 * config
 * purge
 

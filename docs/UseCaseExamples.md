@@ -67,6 +67,8 @@ Example for a very basic ruleset on a IPv6-only host.
 
 **BE AWARE**: IPv6 might break completely if ICMP6 is blocked for any reason
 
+Note: The multicast range `ff00::/8` might be needed on public interfaces. Be aware of that when blocking bogons.
+
 ```yaml
 vars:
   trusted_ranges: ['...']  # add your own ipv6 networks/ranges (equivalent to 'private networks' on IPv4)
