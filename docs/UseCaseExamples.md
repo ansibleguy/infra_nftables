@@ -93,7 +93,7 @@ chains:
     hook: 'input'
     policy: 'drop'
     rules:
-      - {proto: 'icmp6', type: '$type_icmpv6_basic'}
+      - {raw: 'icmpv6 type $type_icmpv6_basic accept'}
       - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 1 icmpv6 type $type_icmpv6_neighbor accept'}
       - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 255 icmpv6 type $type_icmpv6_neighbor accept'}
 
@@ -107,7 +107,7 @@ chains:
     hook: 'output'
     policy: 'drop'
     rules:
-      - {proto: 'icmp6', type: '$type_icmpv6_basic'}
+      - {raw: 'icmpv6 type $type_icmpv6_basic accept'}
       - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 1 icmpv6 type $type_icmpv6_neighbor accept'}
       - {raw: 'ip6 nexthdr icmpv6 ip6 hoplimit 255 icmpv6 type $type_icmpv6_neighbor accept'}
 
