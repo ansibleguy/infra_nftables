@@ -47,6 +47,8 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 
 * [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md)
 
+----
+
 ## Usage
 
 You want a simple Ansible GUI? Check-out my [Ansible WebUI](https://github.com/ansibleguy/webui)
