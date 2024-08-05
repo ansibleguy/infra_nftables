@@ -16,6 +16,7 @@
 - name: NFTables | Pulling info on installed packages
   ansible.builtin.package_facts:
     manager: auto
+  timeout: 5
   ignore_errors: true
   register: nft_packages
   tags: config
