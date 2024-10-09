@@ -34,13 +34,6 @@
   ansible.builtin.import_tasks: check_debian.yml
   when: ansible_os_family | lower == 'debian'
 
-- name: NFTables | Debian 10 Installation
-  ansible.builtin.import_tasks: debian10.yml
-  when:
-    - NFT_CONFIG.enable.deb11_backport | bool
-    - ansible_os_family | lower == 'debian'
-    - ansible_distribution_major_version == '10'
-
 - name: NFTables | Installing
   ansible.builtin.package:
     name: ['nftables']
