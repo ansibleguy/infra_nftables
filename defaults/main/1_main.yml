@@ -83,7 +83,7 @@ defaults_set:
   type: 'ipv4_addr'
   flags: []
   settings: {}
-  counter: true
+  counter: false  # not valid for meters (per-source-ip rate-limits)
 
 no_prompts: false
 debug: false

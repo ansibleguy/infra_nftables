@@ -14,6 +14,10 @@ class FilterModule(object):
 
     @staticmethod
     def ensure_list(data: (str, list)) -> list:
+        # if user supplied a string instead of a list => convert it to match our expectations
+        if data is None:
+            return []
+
         if isinstance(data, list):
             return data
 
