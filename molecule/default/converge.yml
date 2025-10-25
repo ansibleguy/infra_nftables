@@ -129,4 +129,4 @@
                 - {'src': '192.168.0.1/32'}
 
   roles:
-    - ansibleguy.infra_nftables
+    - oxlorg.nftables

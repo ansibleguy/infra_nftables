@@ -1,7 +1,7 @@
 #!/usr/sbin/nft -f
 
 # {{ ansible_managed }}
-# ansibleguy.infra_nftables
+# oxlorg.nftables
 
 flush ruleset
 
@@ -14,9 +14,9 @@ flush ruleset
 {% endif %}
 
 {% if nftables_addons is defined %}
-# BEGIN ANSIBLE MANAGED BLOCK ansibleguy.addons_nftables
+# BEGIN ANSIBLE MANAGED BLOCK oxlorg.nftables_addons
 include "/etc/nftables.d/addons/*.{{ NFT_CONFIG.ext }}"
-# END ANSIBLE MANAGED BLOCK ansibleguy.addons_nftables
+# END ANSIBLE MANAGED BLOCK oxlorg.nftables_addons
 {% endif %}
 
 include "{{ NFT_CONFIG.path.config_dir }}/*.{{ NFT_CONFIG.ext }}"

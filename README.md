@@ -7,16 +7,16 @@
 Role to provision NFTables firewall on linux servers.
 
 
-[![Lint](https://github.com/ansibleguy/infra_nftables/actions/workflows/lint.yml/badge.svg)](https://github.com/ansibleguy/infra_nftables/actions/workflows/lint.yml)
-[![Ansible Galaxy](https://badges.ansibleguy.net/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/ansibleguy/infra_nftables)
+[![Lint](https://github.com/O-X-L/ansible-role-nftables/actions/workflows/lint.yml/badge.svg)](https://github.com/O-X-L/ansible-role-nftables/actions/workflows/lint.yml)
+[![Ansible Galaxy](https://badges.oss.oxl.app/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/oxlorg/nftables)
 
 **Molecule Integration-Tests**:
 
-* Status: [![Molecule Test Status](https://badges.ansibleguy.net/infra_nftables.molecule.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2) |
-[![Functional-Tests](https://github.com/ansibleguy/infra_nftables/actions/workflows/integration_test_result.yml/badge.svg)](https://github.com/ansibleguy/infra_nftables/actions/workflows/integration_test_result.yml)
-* Logs: [API](https://ci.ansibleguy.net/api/job/ansible-test-molecule-infra_nftables/logs?token=2b7bba30-9a37-4b57-be8a-99e23016ce70&lines=1000) | [Short](https://badges.ansibleguy.net/log/molecule_infra_nftables_test_short.log) | [Full](https://badges.ansibleguy.net/log/molecule_infra_nftables_test.log)
+* Status: [![Molecule Test Status](https://badges.oss.oxl.app/infra_nftables.molecule.svg)](https://github.com/O-X-L/ansible-role-oxl-cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2) |
+[![Functional-Tests](https://github.com/O-X-L/ansible-role-nftables/actions/workflows/integration_test_result.yml/badge.svg)](https://github.com/O-X-L/ansible-role-nftables/actions/workflows/integration_test_result.yml)
+* Logs: [API](https://ci.oss.oxl.app/api/job/ansible-test-molecule-infra_nftables/logs?token=2b7bba30-9a37-4b57-be8a-99e23016ce70&lines=1000) | [Short](https://badges.oss.oxl.app/log/molecule_infra_nftables_test_short.log) | [Full](https://badges.oss.oxl.app/log/molecule_infra_nftables_test.log)
 
-Internal CI: [Tester Role](https://github.com/ansibleguy/_meta_cicd) | [Jobs API](https://github.com/O-X-L/github-self-hosted-jobs-systemd)
+Internal CI: [Tester Role](https://github.com/O-X-L/ansible-role-oxl-cicd) | [Jobs API](https://github.com/O-X-L/github-self-hosted-jobs-systemd)
 
 
 **Tested:**
@@ -29,13 +29,13 @@ Internal CI: [Tester Role](https://github.com/ansibleguy/_meta_cicd) | [Jobs API
 
 ```bash
 # latest
-ansible-galaxy role install git+https://github.com/ansibleguy/infra_nftables
+ansible-galaxy role install git+https://github.com/O-X-L/ansible-role-nftables
 
 # from galaxy
-ansible-galaxy install ansibleguy.infra_nftables
+ansible-galaxy install oxlorg.nftables
 
 # or to custom role-path
-ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
+ansible-galaxy install oxlorg.nftables --roles-path ./roles
 ```
 
 ----
@@ -43,14 +43,14 @@ ansible-galaxy install ansibleguy.infra_nftables --roles-path ./roles
 ## Documentation
 
 * NFTables: [Wiki](https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes)
-* Check out the [Example](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Example.md)!
-* [Practical Use-Cases](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/UseCaseExamples.md) (_Docker, Proxmox, Network firewall_)
-  * Integration of [Fail2Ban with NFTables](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Fail2Ban.md)
-* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md)
+* Check out the [Example](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/Example.md)!
+* [Practical Use-Cases](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/UseCaseExamples.md) (_Docker, Proxmox, Network firewall_)
+  * Integration of [Fail2Ban with NFTables](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/Fail2Ban.md)
+* [Troubleshooting Guide](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/Troubleshoot.md)
 
 ## Troubleshoot
 
-* [Troubleshooting Guide](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md)
+* [Troubleshooting Guide](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/Troubleshoot.md)
 
 ----
 
@@ -165,7 +165,7 @@ If you want to **merge group- & host-rules** you could do it like that:
         var: nftables
 
   roles:
-    - ansibleguy.infra_nftables
+    - oxlorg.nftables
 ```
 
 ### Execution
@@ -236,18 +236,18 @@ ansible-playbook -K -D -i inventory/hosts.yml playbook.yml -e debug=yes
 
 * **Note:** Most of the role's functionality can be opted in or out.
 
-  For all available options - see the default-config located in [the main defaults-file](https://github.com/ansibleguy/infra_nftables/blob/latest/defaults/main/1_main.yml)!
+  For all available options - see the default-config located in [the main defaults-file](https://github.com/O-X-L/ansible-role-nftables/blob/latest/defaults/main/1_main.yml)!
 
 
 * **Warning:** Not every setting/variable you provide will be checked for validity. Bad config might break the role!
 
 
-* **Info:** You can add **DNS-Resolution and IP-Blocklist** functionalities to NFTables using the [ansibleguy.addons_nftables](https://github.com/ansibleguy/addons_nftables) role!
+* **Info:** You can add **DNS-Resolution and IP-Blocklist** functionalities to NFTables using the [oxlorg.nftables_addons](https://github.com/O-X-L/ansible-role-nftables-addons) role!
 
 
 * **Warning:** Some **core functionalities** (_NAT/Sets_) might **not be supported by mainstream Distribution kernels**.
 
-  See: [Troubleshooting Guide - 'Unsupported Operation'](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Troubleshoot.md#unsupported-operation)
+  See: [Troubleshooting Guide - 'Unsupported Operation'](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/Troubleshoot.md#unsupported-operation)
 
 
 * **Info:** Read the [Hook documentation](https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks) to know when and how to configure **hooks and priorities**!
@@ -329,4 +329,4 @@ ansible-playbook -K -D -i inventory/hosts.yml playbook.yml -e debug=yes
 
 * **Info:** Docker might need IPTables as Package-Dependency. 
 
-  See: [Use-Case Docker Host](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/UseCaseExamples.md#docker-host)
+  See: [Use-Case Docker Host](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/UseCaseExamples.md#docker-host)

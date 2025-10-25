@@ -63,7 +63,7 @@ jobs:
       - name: Preparing for AnsibleLint
         run: |
           mkdir -p '/tmp/ansible_lint/roles/'
-          ln -s "${{ github.workspace }}" "/tmp/ansible_lint/roles/ansibleguy.${{ github.event.repository.name }}"
+          ln -s "${{ github.workspace }}" "/tmp/ansible_lint/roles/oxlorg.nftables"
           ansible-galaxy collection install -r requirements.yml
         shell: bash
 

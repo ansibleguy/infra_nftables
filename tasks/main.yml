@@ -162,14 +162,14 @@
           . /etc/bash_completion
         fi
       fi
-    marker: "# {mark} ansibleguy.infra_nftables bash-completion"
+    marker: "# {mark} oxlorg.nftables bash-completion"
     state: present
   when: NFT_CONFIG.enable.bash_completion | bool
 
 - name: NFTables | Disabling bash-completion (for root in bashrc)
   ansible.builtin.blockinfile:
     path: '/root/.bashrc'
-    marker: "# {mark} ansibleguy.infra_nftables bash-completion"
+    marker: "# {mark} oxlorg.nftables bash-completion"
     state: absent
   when: not NFT_CONFIG.enable.bash_completion | bool
 

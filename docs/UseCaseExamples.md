@@ -2,7 +2,7 @@
 
 Some example configurations that might be useful for you to get started with NFTables.
 
-I'm not perfect - please open an [Issue](https://github.com/ansibleguy/infra_nftables/issues/new) if you find any discrepancies or errors.
+I'm not perfect - please open an [Issue](https://github.com/O-X-L/ansible-role-nftables/issues/new) if you find any discrepancies or errors.
 
 ----
 
@@ -132,7 +132,7 @@ chains:
 
 * ICMP traffic should also be limited on public interfaces.
 
-* You can also use the [ansibleguy.addons_nftables](https://github.com/ansibleguy/addons_nftables) to tighten:
+* You can also use the [oxlorg.nftables_addons](https://github.com/O-X-L/ansible-role-nftables-addons) to tighten:
   * your outbound rules by only allowing DNS-based destinations
   * your input rules by implementing IP-blocklists (_Tor exit nodes, Spamhaus, ..._)
 
@@ -307,7 +307,7 @@ For simplicity's sake we don't cover IPv6 in this example.
 #### DNS
 
 ```yaml
-# dns resolution via 'ansibleguy.addons_nftables'
+# dns resolution via 'oxlorg.nftables_addons'
 nftables_addons:
   enable:
     dns: true
@@ -426,7 +426,7 @@ Of course - if using NFTables you SHOULD NOT enable the firewall of the Proxmox 
 ### DNS
 
 ```yaml
-# dns resolution via 'ansibleguy.addons_nftables'
+# dns resolution via 'oxlorg.nftables_addons'
 nftables_addons:
   enable:
     dns: true
@@ -518,4 +518,4 @@ To be done
 
 ## Fail2Ban
 
-See: [Fail2Ban](https://github.com/ansibleguy/infra_nftables/blob/latest/docs/Fail2Ban.md)
+See: [Fail2Ban](https://github.com/O-X-L/ansible-role-nftables/blob/latest/docs/Fail2Ban.md)
